@@ -54,7 +54,7 @@ Generated artifact ==> digistack-bank-ear/target/digistack-bank-v1.ear
 # Verification
 1. Open a browser and go to:
 ```
-http://dsb-dmgr.digistack.cloud:9080/digistack-bank/Home
+http://dsb-dmgr.digistack.cloud:9080/digistack-bank/
 ```
 Expected result: Page displays: ==> "DB Read Successful: DigiStack Bank is live - Version 1"
 

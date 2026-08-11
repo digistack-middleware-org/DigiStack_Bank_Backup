@@ -16,7 +16,7 @@ sudo systemctl stop postgresql-16
 ```
 02-Refresh the Browser
 ```
-http://dsb-dmgr.digistack.cloud:9080/digistack-bank/Home
+http://dsb-dmgr.digistack.cloud:9080/digistack-bank/
 ```
 Expected result: Page still renders (doesn't crash/blank-screen), showing a red "DB Read Failed:" message with the actual connection error text.
 ## start the Database
@@ -26,7 +26,7 @@ sudo systemctl start postgresql-16
 ```
 02-Refresh the Browser
 ```
-http://dsb-dmgr.digistack.cloud:9080/digistack-bank/Home
+http://dsb-dmgr.digistack.cloud:9080/digistack-bank/
 ```
 Expected result: Page now shows "DigiStack Bank is live - Version 1"
 
@@ -41,7 +41,7 @@ sudo -u postgres psql -d digistack_bank -c "UPDATE app_config SET config_value =
 ```
 02-Refresh the Browser
 ```
-http://dsb-dmgr.digistack.cloud:9080/digistack-bank/Home
+http://dsb-dmgr.digistack.cloud:9080/digistack-bank/
 ```
 Expected result: Page now shows "Dont worry App Fetch from DB"
 
@@ -51,7 +51,7 @@ sudo -u postgres psql -d digistack_bank -c "UPDATE app_config SET config_value =
 ```
 02-Refresh the Browser
 ```
-http://dsb-dmgr.digistack.cloud:9080/digistack-bank/Home
+http://dsb-dmgr.digistack.cloud:9080/digistack-bank/
 ```
 Expected result: Page now shows "DigiStack Bank is live - Version 1"
 
