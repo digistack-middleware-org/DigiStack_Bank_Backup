@@ -29,18 +29,6 @@ Expected output:
 ```
 id=1, username=testuser, and password_hash=PLACEHOLDER_REPLACE_WITH_REAL_BCRYPT_HASH.
 ```
-Load Schema for Money Transfer
-```
-psql -h 192.168.10.30 -U digistack_app -d digistack_bank -f V3__create_accounts.sql
-```
-#### Verification
-```
-psql -h 192.168.10.30 -U digistack_app -d digistack_bank -c "SELECT * FROM accounts;"
-```
-Expected
-```
-id=1, user_id=1, balance=1000.00
-```
 
 # Setup PostgreSQL JDBC Driver
 

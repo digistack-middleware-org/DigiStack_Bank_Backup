@@ -9,4 +9,7 @@ CREATE TABLE accounts (
 
 -- Seed account linked to our existing testuser, starting balance 1000.00
 INSERT INTO accounts (user_id, balance)
-VALUES (1, 1000.00);
+VALUES (
+    (SELECT id FROM users WHERE username = 'testuser'),
+    1000.00
+);

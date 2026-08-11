@@ -83,7 +83,6 @@
                             Logged in as <strong>${username}</strong><br>
                             Last login: ${lastLogin}
                         </div>
-                        <a href="${pageContext.request.contextPath}/account" class="btn btn-db btn-sm text-white mb-4 me-2">My Account</a>
                         <a href="${pageContext.request.contextPath}/logout" class="btn btn-outline-secondary btn-sm mb-4">Logout</a>
                     <% } else { %>
                         <a href="${pageContext.request.contextPath}/login" class="btn btn-db btn-sm text-white mb-4">Login</a>
