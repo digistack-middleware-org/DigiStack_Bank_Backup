@@ -15,17 +15,15 @@ sudo systemctl enable postgresql-16
 sudo systemctl start postgresql-16
 ```
 ```
-psql -h 192.168.10.30 -U digistack_app -d digistack_bank -f V1__create_app_config.sql
+psql -h 192.168.10.30 -U digistack_app -d digistack_bank -f V2__create_users.sql
 ```
 #### Verification
 ```
-psql -h 192.168.10.30 -U digistack_app -d digistack_bank -c "SELECT * FROM app_config;"
+psql -h 192.168.10.30 -U digistack_app -d digistack_bank -c "SELECT * FROM users;"
 ```
 Expected output:
 ```
-id | config_key      | config_value                          | created_at
-----+-----------------+---------------------------------------+-------------------
-  1 | welcome_message | DigiStack Bank is live - Version 1     | <timestamp>
+id=1, username=testuser, and password_hash=PLACEHOLDER_REPLACE_WITH_REAL_BCRYPT_HASH.
 ```
 
 # Setup PostgreSQL JDBC Driver

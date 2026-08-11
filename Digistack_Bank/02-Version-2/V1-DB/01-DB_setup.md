@@ -102,23 +102,19 @@ psql -d digistack_bank
 GRANT ALL ON SCHEMA public TO digistack_app;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO digistack_app;
 ```
-### Quit Db
+# Deploy Schema
 ```
-\q
-```
-# Deploy Schema to database
-
-### Deploy in Localhost {DB server}
-```
-psql -h localhost -U digistack_app -d digistack_bank -f V1__create_app_config.sql
+psql -h localhost -U digistack_app -d digistack_bank -f V2__create_users.sql
 ```
 #### Verification
 ```
-psql -h localhost -U digistack_app -d digistack_bank -c "SELECT * FROM app_config;"
+psql -h localhost -U digistack_app -d digistack_bank -c "SELECT * FROM users;"
 ```
 Expected output:
 ```
-id | config_key      | config_value                          | created_at
-----+-----------------+---------------------------------------+-------------------
-  1 | welcome_message | DigiStack Bank is live - Version 1     | <timestamp>
+id=1, username=testuser, and password_hash=PLACEHOLDER_REPLACE_WITH_REAL_BCRYPT_HASH.
+```
+### Quit Db
+```
+\q
 ```
