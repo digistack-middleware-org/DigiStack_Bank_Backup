@@ -1,57 +1,43 @@
-# Befor do Experiments Take Backup
-## Take the Existing Application Backup
-```
-mkdir -p /opt/backups
-/apps/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/bin/backupConfig.sh /opt/backups/v1-baseline-config.zip
-ls -la /opt/backups/v1-baseline-config.zip
-```
-
 # Verification -1
 Here we verify the Application content will fetch from DB or Not by Crashing the DB
 
-## Stop the Database
-01- stop the DB
+## Open the Browser
 ```
-sudo systemctl stop postgresql-16
+http://dsb-dmgr.digistack.cloud:9080/digistack-bank/login
 ```
-02-Refresh the Browser
+Login with Username and Password
 ```
-http://dsb-dmgr.digistack.cloud:9080/digistack-bank/
+testuser 
+Password123!
 ```
-Expected result: Page still renders (doesn't crash/blank-screen), showing a red "DB Read Failed:" message with the actual connection error text.
-## start the Database
-01- start the DB
-```
-sudo systemctl start postgresql-16
-```
-02-Refresh the Browser
-```
-http://dsb-dmgr.digistack.cloud:9080/digistack-bank/
-```
-Expected result: Page now shows "DigiStack Bank is live - Version 1"
+Expected on Home page ==>  A green box saying "Logged in as testuser" and "Last login: [some date/time]", plus a Logout button
 
-# Verification -2
-Here we verify the Application content will fetch from DB or Not by changing the Data in DB
+#### Logout from the Session
 
-## Prove the Page Shows Live Data
-01- Update Data in Database from dsb-db
+Expected ==> Redirects to the Login page
+
+## verification-2 ==> Direct to Hompage
+
+##### Now try going directly to Homepage 
+```
+http://dsb-dmgr.digistack.cloud:9080/digistack-bank/home
+```
+Expected ==> Home page loads, but the green "Logged in as..." box is gone — replaced by a plain "Login" button, since the session was destroyed
+
+## Verification-3 ==> Observing Redeploy / Startup Behavior
+Check the Logs
+```
+tail -f /apps/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log
 ```
 
-sudo -u postgres psql -d digistack_bank -c "UPDATE app_config SET config_value = 'Dont worry App Fetch from DB' WHERE config_key = 'welcome_message';"
-```
-02-Refresh the Browser
-```
-http://dsb-dmgr.digistack.cloud:9080/digistack-bank/
-```
-Expected result: Page now shows "Dont worry App Fetch from DB"
+02- Stop the Application from Console and Check the Logs
 
-03 - Put the Original Value Back in Database from dsb-db
 ```
-sudo -u postgres psql -d digistack_bank -c "UPDATE app_config SET config_value = 'DigiStack Bank is live - Version 1' WHERE config_key = 'welcome_message';"
+tail -f /apps/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log
 ```
-02-Refresh the Browser
-```
-http://dsb-dmgr.digistack.cloud:9080/digistack-bank/
-```
-Expected result: Page now shows "DigiStack Bank is live - Version 1"
 
+03- start the Application from Console and Check the Logs
+
+```
+tail -f /apps/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log
+```
