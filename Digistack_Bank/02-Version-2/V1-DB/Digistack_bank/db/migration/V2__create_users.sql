@@ -11,4 +11,4 @@ CREATE TABLE users (
 -- NOTE: actual hash generation happens in Sprint 2 when we write the LoginServlet.
 -- Placeholder row inserted here; real bcrypt hash substituted before Sprint 2 testing.
 INSERT INTO users (username, password_hash)
-VALUES ('testuser', 'PLACEHOLDER_REPLACE_WITH_REAL_BCRYPT_HASH');
+VALUES ('testuser', '$2a$10$ccmg6mcdzL9M0fCz0M62y./g6yRD4qCRYlnpjBeXCFMND9SIRG/k.');

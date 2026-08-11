@@ -118,3 +118,38 @@ id=1, username=testuser, and password_hash=PLACEHOLDER_REPLACE_WITH_REAL_BCRYPT_
 ```
 \q
 ```
+
+## Update the Database with the Real Hash
+```
+psql -h localhost -U digistack_app -d digistack_bank
+```
+
+```
+UPDATE users
+SET password_hash = '$2a$10$ccmg6mcdzL9M0fCz0M62y./g6yRD4qCRYlnpjBeXCFMND9SIRG/k.'
+WHERE username = 'testuser';
+```
+#### Verification
+```
+SELECT username, password_hash FROM users;
+```
+Expected ==> Shows testuser with the new hash (starting $2a$10$ccmg6...), not the placeholder text anymore.
+
+### Quit Db
+```
+\q
+```
+
+## Keep the Migration File With real Hash
+chanf your Db Migration file "V2__create_users.sql"
+
+Change the line:
+
+```
+VALUES ('testuser', 'PLACEHOLDER_REPLACE_WITH_REAL_BCRYPT_HASH');
+```
+Replace with:
+
+```
+VALUES ('testuser', '$2a$10$ccmg6mcdzL9M0fCz0M62y./g6yRD4qCRYlnpjBeXCFMND9SIRG/k.');
+```
