@@ -54,12 +54,12 @@ Generated artifact ==> digistack-bank-ear/target/digistack-bank-v1.ear
 # Verification
 1. Open a browser and go to:
 ```
-http://dsb-dmgr.digistack.cloud:9080/digistack-bank/
+http://dsb-dmgr.digistack.cloud:9080/digistack-bank/login
 ```
-Expected result: Page displays: ==> "DB Read Successful: DigiStack Bank is live - Version 1"
+2. Login with Username and Password
 
-2. Confirm the log entry
-On dsb-dmgr, run:
 ```
-grep "AppConfigTestServlet" /apps/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log
+Username: testuser
+Password: Password123!
 ```
+
