@@ -76,14 +76,25 @@
         <div class="row justify-content-center">
             <div class="col-md-8 col-lg-6">
                 <div class="card db-card p-4">
-                    <div class="card-body text-center">
-                        <h5 class="card-title text-muted mb-3">System Status</h5>
-                        <p class="fs-5">
-                            <span class="db-accent">&#9679;</span>
-                            ${welcomeMessage}
-                        </p>
-                        <p class="text-muted small mb-0">Live read from PostgreSQL via WebSphere-managed JDBC.</p>
-                    </div>
+                <div class="card-body text-center">
+
+                    <% if (request.getAttribute("username") != null) { %>
+                        <div class="alert alert-success py-2 small mb-3">
+                            Logged in as <strong>${username}</strong><br>
+                            Last login: ${lastLogin}
+                        </div>
+                        <a href="${pageContext.request.contextPath}/logout" class="btn btn-outline-secondary btn-sm mb-4">Logout</a>
+                    <% } else { %>
+                        <a href="${pageContext.request.contextPath}/login" class="btn btn-db btn-sm text-white mb-4">Login</a>
+                    <% } %>
+
+                    <h5 class="card-title text-muted mb-3">System Status</h5>
+                    <p class="fs-5">
+                        <span class="db-accent">&#9679;</span>
+                        ${welcomeMessage}
+                    </p>
+                    <p class="text-muted small mb-0">Live read from PostgreSQL via WebSphere-managed JDBC.</p>
+                </div>
                 </div>
             </div>
         </div>

@@ -54,7 +54,13 @@ public class HomeServlet extends HttpServlet {
             logger.severe("HomeServlet: Database connection/query failed: " + e.getMessage());
         }
 
-        request.setAttribute("welcomeMessage", welcomeMessage);
-        request.getRequestDispatcher("/Home.jsp").forward(request, response);
+            javax.servlet.http.HttpSession session = request.getSession(false);
+            if (session != null && session.getAttribute("username") != null) {
+                request.setAttribute("username", session.getAttribute("username"));
+                request.setAttribute("lastLogin", session.getAttribute("lastLogin"));
+            }
+
+            request.setAttribute("welcomeMessage", welcomeMessage);
+            request.getRequestDispatcher("/Home.jsp").forward(request, response);
     }
 }
