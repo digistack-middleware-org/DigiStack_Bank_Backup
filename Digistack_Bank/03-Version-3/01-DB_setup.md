@@ -102,10 +102,15 @@ psql -d digistack_bank
 GRANT ALL ON SCHEMA public TO digistack_app;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO digistack_app;
 ```
+### Quit Db
+```
+\q
+```
 # Deploy Schema
 ```
 psql -h localhost -U digistack_app -d digistack_bank -f V1__create_app_config.sql
 ```
+Load the Login Module Schema
 ```
 psql -h localhost -U digistack_app -d digistack_bank -f V2__create_users.sql
 ```
@@ -117,7 +122,16 @@ Expected output:
 ```
 id=1, username=testuser, and password_hash=PLACEHOLDER_REPLACE_WITH_REAL_BCRYPT_HASH.
 ```
-### Quit Db
+
+Load the Transaction Schema
 ```
-\q
+psql -h localhost -U digistack_app -d digistack_bank -f V3__create_accounts.sql
+```
+#### Verification
+```
+psql -h localhost -U digistack_app -d digistack_bank -c "SELECT * FROM accounts;"
+```
+Expected output:
+```
+id=1, username=testuser, and password_hash=PLACEHOLDER_REPLACE_WITH_REAL_BCRYPT_HASH.
 ```
