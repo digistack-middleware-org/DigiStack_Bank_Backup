@@ -41,22 +41,24 @@ public class LoginServlet extends HttpServlet {
         String password = request.getParameter("password");
 
         String storedHash = null;
+        int userId = -1;
 
         try {
             Class.forName("org.postgresql.Driver");
 
             try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-                 PreparedStatement stmt = conn.prepareStatement(
-                         "SELECT password_hash FROM users WHERE username = ?")) {
+            PreparedStatement stmt = conn.prepareStatement(
+                    "SELECT id, password_hash FROM users WHERE username = ?")) {
 
-                stmt.setString(1, username);
+            stmt.setString(1, username);
 
-                try (ResultSet rs = stmt.executeQuery()) {
-                    if (rs.next()) {
-                        storedHash = rs.getString("password_hash");
-                    }
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    storedHash = rs.getString("password_hash");
+                    userId = rs.getInt("id");
                 }
             }
+        }
 
         } catch (ClassNotFoundException e) {
             logger.severe("LoginServlet: PostgreSQL JDBC driver not found: " + e.getMessage());
@@ -69,6 +71,7 @@ public class LoginServlet extends HttpServlet {
         if (valid) {
             HttpSession session = request.getSession(true);
             session.setAttribute("username", username);
+            session.setAttribute("userId", userId);
             session.setAttribute("lastLogin", new java.util.Date());
             logger.info("LoginServlet: successful login for user: " + username);
 
