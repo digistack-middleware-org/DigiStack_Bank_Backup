@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.digistack</groupId>
+        <artifactId>digistack-bank-parent</artifactId>
+        <version>1.0</version>
+    </parent>
+
+    <artifactId>digistack-bank-ear</artifactId>
+    <!-- packaging: ear tells Maven to produce a .ear file -->
+    <packaging>ear</packaging>
+    <name>DigiStack Bank - EAR</name>
+
+    <dependencies>
+        <!-- The WAR module is included inside this EAR.
+             "provided" is NOT used here — the EAR module must package
+             the WAR into itself. -->
+        <dependency>
+            <groupId>com.digistack</groupId>
+            <artifactId>digistack-bank-web</artifactId>
+            <version>1.0</version>
+            <type>war</type>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <!-- Controls how Maven packages the EAR file -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-ear-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+                    <!-- Java EE version for the EAR descriptor -->
+                    <version>7</version>
+                    <!-- The final EAR file name — this is what you deploy to WAS -->
+                    <finalName>digistack-bank-v3</finalName>
+                    <modules>
+                        <webModule>
+                            <!-- Tells the EAR which WAR to include -->
+                            <groupId>com.digistack</groupId>
+                            <artifactId>digistack-bank-web</artifactId>
+                            <!-- Context root = the URL prefix in the browser -->
+                            <contextRoot>/digistack-bank</contextRoot>
+                        </webModule>
+                    </modules>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
