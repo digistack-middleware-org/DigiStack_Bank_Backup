@@ -26,7 +26,7 @@ removing all read and write access for all users and processes:
 
 ```bash
 chmod 000 \
-  /opt/IBM/WebSphere/AppServer/profiles/\
+  /apps/IBM/WebSphere/AppServer/profiles/\
 devdsbinappserver01/logs/server1/SystemOut.log
 ```
 

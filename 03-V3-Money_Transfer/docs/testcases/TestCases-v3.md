@@ -191,7 +191,7 @@ Note on TC-v1-03: application name is now `digistack-bank-v3`.
 | **Description** | Deposit and withdrawal confirmed in SystemOut.log |
 | **Type** | Integration |
 | **Priority** | Critical |
-| **Steps** | 1. Perform one deposit and one withdrawal as customer1. 2. On dsb-dmgr VM run: `grep "AccountServlet" /opt/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log \| tail -10` |
+| **Steps** | 1. Perform one deposit and one withdrawal as customer1. 2. On dsb-dmgr VM run: `grep "AccountServlet" /apps/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log \| tail -10` |
 | **Expected Result** | Log contains: `AccountServlet: Deposit successful. userId=1 amount=<amount> newBalance=<balance>` AND `AccountServlet: Withdraw successful. userId=1 amount=<amount> newBalance=<balance>`. |
 | **Actual Result** | |
 | **Status** | |

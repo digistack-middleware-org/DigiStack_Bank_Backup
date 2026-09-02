@@ -2,7 +2,7 @@
 # Deploy the Application {Admin console}
 1. Log into Admin Console: https://<vm-ip>:9043/ibm/console
 2. Go to: Applications → New Application → New Enterprise Application
-3. Choose Remote file system (since the EAR is already on the VM, not your browser's machine) → Browse → navigate to /opt/staging/ears/digistack-bank-v1.ear → Next
+3. Choose Remote file system (since the EAR is already on the VM, not your browser's machine) → Browse → navigate to /apps/staging/ears/digistack-bank-v1.ear → Next
 4. Choose Fast Path (the simplified wizard, appropriate for a first deploy) → Next
 5. On the Select Installation Options screen:
 		Leave defaults, confirm Application name shows digistack-bank-v1 (or similar, auto-derived from the EAR)
@@ -34,7 +34,7 @@ v1_deploy.py
 #           installed. Safe to run multiple times.
 #
 # Run from dsb-dmgr VM:
-#   cd /opt/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/bin/
+#   cd /apps/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/bin/
 #   ./wsadmin.sh -lang jython -username wasadmin -password <pwd> \
 #       -f /tmp/v1_deploy.py
 #
@@ -185,7 +185,7 @@ grep -i "error\|exception\|SEVERE" \
 Confirm the servlet log line appears after the update:
 ```
 grep "HomeServlet" \
-    /opt/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log \
+    /apps/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log \
     | tail -5
 ```
 Expected result — you should see a line like:

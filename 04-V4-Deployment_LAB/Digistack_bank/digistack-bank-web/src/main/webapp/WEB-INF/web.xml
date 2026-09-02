@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+             http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+         version="3.1">
+
+    <display-name>DigiStack Bank</display-name>
+    <description>DigiStack Bank Web Application - v2</description>
+
+    <!-- Welcome file — bare context root serves Home via HomeServlet -->
+    <welcome-file-list>
+        <welcome-file>Home.jsp</welcome-file>
+    </welcome-file-list>
+
+    <!-- Session timeout — 30 minutes of inactivity ends the session.
+         Tuned further at v9 (Session Management topic). -->
+    <session-config>
+        <session-timeout>30</session-timeout>
+    </session-config>
+
+    <!-- Error pages — custom handlers.
+         404 and 500 at the IHS layer added at v8.
+         These app-level handlers catch errors within the WAR. -->
+    <error-page>
+        <error-code>403</error-code>
+        <location>/Login.jsp</location>
+    </error-page>
+
+</web-app>

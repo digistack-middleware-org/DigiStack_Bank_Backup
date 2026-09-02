@@ -103,7 +103,7 @@ wsadmin.sh -lang jython -username wasadmin -password <redacted>
 2. backupConfig:
 
 ./backupConfig.sh
-/opt/backups/was-config/devdsbinappserver01_v2_backup.zip
+/apps/backups/was-config/devdsbinappserver01_v2_backup.zip
 
    Result: `ADMU5002I: XXX files successfully backed up`
 
@@ -208,7 +208,7 @@ See `TestCases-v2.md` for full detail. Summary:
 
 ./stopServer.sh server1 -username wasadmin -password <redacted>
 ./restoreConfig.sh
-/opt/backups/was-config/devdsbinappserver01_v1_backup.zip
+/apps/backups/was-config/devdsbinappserver01_v1_backup.zip
 ./startServer.sh server1
 
 3. Reinstall `digistack-bank-v1.ear` via Admin Console.

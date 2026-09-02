@@ -53,7 +53,7 @@ Log in with `customer1` / `Customer@123` → click **Sign In**.
 
 ```bash
 grep "LoginServlet" \
-  /opt/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log \
+  /apps/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log \
   | tail -5
 ```
 

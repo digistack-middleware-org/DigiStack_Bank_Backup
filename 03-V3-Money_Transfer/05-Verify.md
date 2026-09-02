@@ -84,7 +84,7 @@ Expected result:
 On the dsb-app VM:
 ```
 grep "DashboardServlet" \
-  /opt/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log \
+  /apps/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log \
   | tail -5
 ```
 Expected result — log lines showing account loads and frozen state transitions:

@@ -134,7 +134,7 @@ and must be re-run at every subsequent version sign-off.
 | **Description** | HomeServlet DB read confirmed in WAS SystemOut.log |
 | **Type** | Integration |
 | **Priority** | Critical |
-| **Steps** | 1. On dsb-dmgr VM run: `grep "HomeServlet" /opt/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log` 2. Load the Home page once if no log line appears yet, then re-run grep. 3. Observe the log output. |
+| **Steps** | 1. On dsb-dmgr VM run: `grep "HomeServlet" /apps/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log` 2. Load the Home page once if no log line appears yet, then re-run grep. 3. Observe the log output. |
 | **Expected Result** | Log contains the line: `HomeServlet: DB read successful. bank.name=DigiStack Bank`. Log contains: `HomeServlet: PostgreSQL JDBC driver loaded successfully.`. No `HomeServlet: DB read FAILED` line present. |
 | **Actual Result** | |
 | **Status** | |
@@ -164,7 +164,7 @@ and must be re-run at every subsequent version sign-off.
 | **Description** | WAS profile uses correct naming standard |
 | **Type** | Functional |
 | **Priority** | High |
-| **Steps** | 1. On dsb-dmgr VM run: `/opt/IBM/WebSphere/AppServer/bin/manageprofiles.sh -listProfiles` 2. In Admin Console navigate to System Administration → Cell to read cell name. 3. Navigate to System Administration → Nodes to read node name. |
+| **Steps** | 1. On dsb-dmgr VM run: `/apps/IBM/WebSphere/AppServer/bin/manageprofiles.sh -listProfiles` 2. In Admin Console navigate to System Administration → Cell to read cell name. 3. Navigate to System Administration → Nodes to read node name. |
 | **Expected Result** | Profile name: `devdsbinappserver01`. Cell name: `devdsbincell01`. Node name: `devdsbinnode01`. Server name: `server1`. All match STD v1.10 naming convention exactly. |
 | **Actual Result** | |
 | **Status** | |
@@ -209,7 +209,7 @@ and must be re-run at every subsequent version sign-off.
 | **Description** | PostgreSQL JDBC driver is present in WAS lib/ext/jdbc/ |
 | **Type** | Integration |
 | **Priority** | High |
-| **Steps** | 1. On dsb-dmgr VM run: `ls -lh /opt/IBM/WebSphere/AppServer/lib/ext/jdbc/postgresql-42.7.3.jar` |
+| **Steps** | 1. On dsb-dmgr VM run: `ls -lh /apps/IBM/WebSphere/AppServer/lib/ext/jdbc/postgresql-42.7.3.jar` |
 | **Expected Result** | File is listed. Size is approximately 1 MB. No "No such file or directory" error. |
 | **Actual Result** | |
 | **Status** | |

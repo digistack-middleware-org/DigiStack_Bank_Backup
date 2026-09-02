@@ -110,7 +110,7 @@ Login: wasadmin /
 The GUI cannot show log *contents* — logs are files on disk. View them on the **dsb-app VM**:
 
 ```bash
-cd /opt/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/
+cd /apps/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/
 tail -f SystemOut.log
 
 Then in your browser: Login → Dashboard → Deposit 100→Withdraw100→Withdraw50 → Withdraw $999,999
@@ -148,7 +148,7 @@ Run the Scripts
 Verify the Actual Transaction Logs
 
 ```bash
-cd /opt/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/
+cd /apps/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/
 tail -f SystemOut.log
 
 Then in your browser: Login → Dashboard → Deposit 100→Withdraw100→Withdraw50 → Withdraw $999,999

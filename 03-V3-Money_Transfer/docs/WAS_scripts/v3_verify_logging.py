@@ -7,7 +7,7 @@
 #           Does NOT change configuration — read-only verification.
 #
 # Run from dsb-dmgr VM:
-#   cd /opt/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/bin/
+#   cd /apps/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/bin/
 #   ./wsadmin.sh -lang jython -username wasadmin -password <pwd> \
 #       -f /tmp/v3_verify_logging.py
 # =============================================================

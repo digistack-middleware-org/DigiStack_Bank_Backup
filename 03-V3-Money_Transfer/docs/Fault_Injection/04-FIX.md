@@ -6,7 +6,7 @@ On the **dsb-dmgr** VM:
 
 ```bash
 chmod 640 \
-  /opt/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log
+  /apps/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log
 ```
 
 > 💡 **Concept — `chmod 640`:** Owner (WAS process / root) gets read+write (`6`), group gets read-only (`4`), others get nothing (`0`). This is the standard permission for a log file owned by the WAS process user — readable by the admin group for monitoring, writable only by the owner.
@@ -19,7 +19,7 @@ No output is expected. That is correct.
 
 ```bash
 ls -lh \
-  /opt/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log
+  /apps/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log
 ```
 
 **Expected result:**
@@ -36,7 +36,7 @@ ls -lh \
 
 ```bash
 tail -20 \
-  /opt/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log
+  /apps/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log
 ``**Expected result:** The last 20 lines of the log appear **without a permission error**. You should see WAS startup messages and servlet init lines.
 
 ---
@@ -55,7 +55,7 @@ http://192.168.10.10:9080/digistack-bank/Home
 
 ```bash
 tail -5 \
-  /opt/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log
+  /apps/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log
 ```
 
 **Expected result:** You see **new timestamped entries** after the page load. The log is live again. ✅
@@ -68,7 +68,7 @@ Perform a small deposit (**100**) in the browser, then:
 
 ```bash
 grep "AccountServlet" \
-  /opt/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log \
+  /apps/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log \
   | tail -3
 ```
 
@@ -112,7 +112,7 @@ The monitoring pipeline's tailer process should run as a **dedicated low-privile
 The Linux audit daemon (`auditd`) can log every `chmod` or `chown` call on the WAS logs directory:
 
 ```bash
-auditctl -w /opt/IBM/WebSphere/AppServer/profiles/ \
+auditctl -w /apps/IBM/WebSphere/AppServer/profiles/ \
   -p wa -k was_log_changes
 ```
 

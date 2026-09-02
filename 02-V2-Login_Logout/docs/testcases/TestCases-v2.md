@@ -242,7 +242,7 @@ not `digistack-bank-v1`. Confirm the new name shows Started.
 | **Description** | Login confirmed in SystemOut.log with correct user and role |
 | **Type** | Integration |
 | **Priority** | High |
-| **Steps** | 1. Log in as `customer1`. 2. On dsb-dmgr VM run: `grep "LoginServlet" /opt/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log \| tail -5` |
+| **Steps** | 1. Log in as `customer1`. 2. On dsb-dmgr VM run: `grep "LoginServlet" /apps/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log \| tail -5` |
 | **Expected Result** | Log contains: `LoginServlet: Login successful for user: customer1 role: CUSTOMER`. No `Login failed` line for this attempt. |
 | **Actual Result** | |
 | **Status** | |
@@ -257,7 +257,7 @@ not `digistack-bank-v1`. Confirm the new name shows Started.
 | **Description** | Logout confirmed in SystemOut.log |
 | **Type** | Integration |
 | **Priority** | High |
-| **Steps** | 1. Log in as `customer1`. 2. Click Logout. 3. On dsb-dmgr VM run: `grep "LogoutServlet" /opt/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log \| tail -5` |
+| **Steps** | 1. Log in as `customer1`. 2. Click Logout. 3. On dsb-dmgr VM run: `grep "LogoutServlet" /apps/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log \| tail -5` |
 | **Expected Result** | Log contains: `LogoutServlet: Session invalidated for user: customer1`. |
 | **Actual Result** | |
 | **Status** | |
