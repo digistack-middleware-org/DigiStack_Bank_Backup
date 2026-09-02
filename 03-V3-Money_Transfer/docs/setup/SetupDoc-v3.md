@@ -1,93 +1,310 @@
-# Setup Documentation — Version 3: Basic Transaction (Deposit & Withdraw)
-
-**Part:** P01 — Foundation
-**Prerequisite versions completed:** v1, v2
-**Estimated setup time:** 3-4 hours
+# SetupDoc-v3.md
+# DigiStack Bank — P01 Version 3
+# Title: Basic Transaction (Deposit & Withdraw)
 
 ---
 
-## 1. Overview
-Introduces the first real business transaction (Deposit/Withdraw) and
-formal Controller → Service → DAO → DB layering. Adds accounts table
-linked to users via foreign key. Enforces the core business rule: a
-withdrawal cannot exceed the account's current balance.
+## §1 Overview
 
-## 2. VM Setup
-No new VM/package changes — reuses dsb-dmgr and dsb-db from v1/v2.
+Version 3 introduces the first financial transactions — Deposit and
+Withdraw — using a full Controller → Service → DAO → DB enterprise
+layering pattern. The `accounts` table is added to PostgreSQL with a
+foreign key to `users`. Four new Java classes implement the layering:
+`Account` (model), `AccountDao` (SQL only), `AccountService` (business
+rules including overdraft rejection and frozen account enforcement), and
+`AccountServlet` (controller, PRG pattern). A `BalanceJsonServlet`
+returns balance as JSON for the Dashboard's AJAX balance toggle.
+`DashboardServlet` is updated to load live account data on every visit.
+`Dashboard.jsp` is retrofitted to show the real account number, account
+type, and a frozen account banner. WAS ClassLoader policy is explicitly
+configured: PARENT_FIRST class loader order, SINGLE WAR class loader
+policy. The EAR is renamed to `digistack-bank-v3.ear`.
 
-## 3. Pre-Deployment Checklist
-- [x] v2 SetupDoc completed and verified
-- [x] VM snapshot taken (pre-v3)
-- [x] Git branch feature/v3-transactions created from develop
+WebSphere topics: Enterprise application layering (Controller → Service
+→ DAO → DB), ClassLoader policy (PARENT_FIRST / SINGLE), EAR redeploy
+(version name change v2 → v3).
 
-## 4. Step-by-Step Configuration
+---
 
-### 4.1 WebSphere Admin Console Steps
-1. No new WebSphere config objects required — reuses existing profile,
-   shared library, and application definition
-2. Updated digistack-bank-v1 application via Update > Replace entire
-   application, using digistack-bank-v3.ear (see §7 naming note)
-3. Explicit Stop, then Start performed after update — required to force
-   WebSphere's Application ClassLoader to discard old in-memory classes
-   and load the new ones (see §7, ClassLoader troubleshooting note)
+## §2 VM Setup
 
-### 4.2 wsadmin / Command-Line Steps
-AdminApp.update(...) + AdminControl.invoke(...) stop/start, equivalent
-to the GUI steps above.
+Same two VMs as v1 and v2. No new VMs powered on this version.
 
-### 4.3 Database Changes
-Migration: V3__create_accounts.sql (creates accounts table: id, user_id
-FK to users, balance NUMERIC(15,2); seeds one account for testuser,
-starting balance 1000.00)
-Rollback: V3__create_accounts_rollback.sql (DROP TABLE accounts)
+| VM | Role | IP | vCPU | RAM | Status |
+|---|---|---|---|---|---|
+| dsb-dmgr | Standalone WAS AppServer | 192.168.10.10 | 2 | 3 GB | Running |
+| dsb-db | PostgreSQL 16 | 192.168.10.30 | 2 | 2 GB | Running |
 
-### 4.4 Application Deployment
-Same Maven multi-module project. New packages added:
-- com.digistack.bank.dao (AccountDao — pure data access, no business logic)
-- com.digistack.bank.service (AccountService — deposit/withdraw business
-  rules, including overdraft prevention)
-- AccountController.java (controller/) and Account.jsp added
-- LoginServlet.java modified to also store userId in the session
-  (previously only stored username)
+Version-specific items:
+- `V3__create_accounts.sql` migration added `accounts` table with
+  foreign key to `users` and balance check constraint
+- `digistack-bank-v2` uninstalled, `digistack-bank-v3` installed
+- ClassLoader configured: PARENT_FIRST + SINGLE (Admin Console and
+  wsadmin script `v3_set_classloader.py`)
+- Development: Windows laptop (VSCode + Maven) — code written here,
+  EAR built here, copied to dsb-dmgr via scp
 
-Build command unchanged: `mvn clean package` at digistack-bank-parent
-level. EAR artifact name changed from digistack-bank-v1 to
-digistack-bank-v3 as of this version (see §7).
+---
 
-## 5. Verification Steps
-See TestCases-v3.md — 10/10 Critical+High test cases pass, including
-overdraft rejection (TC-v3-05) and unauthenticated-access blocking
-(TC-v3-07).
+## §3 Pre-Deployment Checklist
 
-## 6. Rollback Procedure
-- VM snapshot restore (pre-v3 snapshot), or:
-- Redeploy v2's EAR via Update Application, or:
-- Run V3__create_accounts_rollback.sql for a schema-only rollback
+- [x] **01_Architecture diagram check** — opened `01_Architecture/README.md`.
+      Triggers checked for v3:
+      `06_Database_ER_Diagram.md` — triggers at v3 (`accounts` table
+      added). Updated to show `accounts` table with FK to `users`.
+      `03_Request_Flows.md` — extended to include Deposit/Withdraw
+      flow (Browser → AccountServlet → AccountService → AccountDao →
+      PostgreSQL → redirect → Account.jsp).
+      `08_Deployment_Architecture.md` — updated for v3 EAR.
+      All other diagrams: no new trigger at v3 — untouched.
+- [x] Previous SetupDoc verified — SetupDoc-v2.md reviewed and
+      confirmed complete before v3 work began
+- [x] VM snapshot taken — dsb-dmgr and dsb-db snapshotted in VMware
+      Workstation before Sprint 1 work began
+- [x] Git branch created — `feature/v3-transactions`, created at
+      Sprint 1 Step 9
 
-## 7. Known Issues / Troubleshooting
-- **EAR naming inconsistency (v1-v2):** digistack-bank-ear's pom.xml
-  hardcoded <finalName>digistack-bank-v1</finalName> and was never
-  updated for v2 — meaning the file actually deployed throughout v2 was
-  still named digistack-bank-v1.ear, despite SetupDoc-v2.md referring to
-  "the v2 EAR." Corrected starting this version: finalName now updated
-  per-version (digistack-bank-v3, going forward v4, v5, etc.), matching
-  STD's Deployables naming convention. The deployed WebSphere
-  application name itself (digistack-bank-v1) was NOT changed — only
-  the underlying artifact filename — since renaming the live application
-  object wasn't necessary to fix the actual naming gap.
-- **Stale build/deploy confusion (this version):** After editing
-  Home.jsp to add the "My Account" button, an initial redeploy appeared
-  to not take effect — the button was missing even though the source
-  file was correct. Root cause: WebSphere's Application ClassLoader
-  retains old in-memory classes across an Update Application action
-  unless the app is explicitly Stopped and Started afterward. A Save
-  alone is not sufficient. Fix: always perform explicit Stop → Start
-  after any Update Application action, not just Save. This is the same
-  lesson Sprint 5's ClassLoader walkthrough covers formally.
-- Same hardcoded-credential technical debt as v1/v2, now also present in
-  AccountDao.java — consistent, scheduled for resolution at Version 7.
+---
 
-## 8. Sign-off
-- [x] Setup completed successfully
-- [x] All verification steps passed (10/10 Critical+High test cases)
-- [x] Documentation reviewed for accuracy
+## §4 Step-by-Step Configuration
+
+### §4.1 WebSphere Admin Console Steps
+
+1. Navigated to `http://192.168.10.10:9060/ibm/console`, logged in
+   as `wasadmin`. Result: Welcome page loaded.
+
+2. Applications → WebSphere enterprise applications →
+   tick `digistack-bank-v2` → Stop → wait for red X.
+   Result: digistack-bank-v2 stopped.
+
+3. Tick `digistack-bank-v2` → Uninstall → OK → Save.
+   Result: digistack-bank-v2 removed from application list.
+
+4. Install → Local file system → Browse →
+   `digistack-bank-v3.ear` → Next → defaults →
+   WAR mapped to `server1`, virtual host `default_host` →
+   Finish → Save.
+   Result: `Application digistack-bank-v3 installed successfully.`
+
+5. Tick `digistack-bank-v3` → Start.
+   Result: green arrow ▶.
+
+6. Applications → digistack-bank-v3 →
+   Class loading and update detection:
+   - Class loader order: PARENT_FIRST
+   - WAR class loader policy: Single class loader for application
+   → OK → Save.
+   Result: ClassLoader policy saved.
+
+7. (Mid-sprint update path): Applications → digistack-bank-v3 →
+   Update → Replace entire application → browse new EAR →
+   Next → Finish → Save → Stop → Start.
+   Used during Sprint 4 redeploy and Sprint 5 formal cycle.
+
+### §4.2 wsadmin / Command-Line Steps
+
+1. Deployment script — `scripts/v3_deploy.py` run via:
+
+wsadmin.sh -lang jython -username wasadmin -password <redacted>
+-f /tmp/v3_deploy.py
+
+   Result: `=== Deployment complete. ===`
+   digistack-bank-v2 uninstalled, digistack-bank-v3 installed
+   and started, state: STARTED.
+
+2. ClassLoader configuration — `scripts/v3_set_classloader.py`:
+
+wsadmin.sh -lang jython -username wasadmin -password <redacted>
+-f /tmp/v3_set_classloader.py
+
+   Result: `=== ClassLoader configuration complete. ===`
+   PARENT_FIRST and SINGLE confirmed set.
+
+3. Logging verification — `scripts/v3_verify_logging.py`:
+
+wsadmin.sh -lang jython -username wasadmin -password <redacted>
+-f /tmp/v3_verify_logging.py
+
+   Result: `=== Logging verification complete. ===`
+   All rotation settings OK (50 MB / 3 files).
+   Trace spec *=info confirmed at both config and runtime level.
+
+4. backupConfig:
+
+./backupConfig.sh
+/opt/backups/was-config/devdsbinappserver01_v3_backup.zip
+
+   Result: `ADMU5002I: XXX files successfully backed up`
+
+### §4.3 Database Changes
+
+Migration executed on dsb-db:
+
+psql -U digistack_app -d digistack_bank -h 127.0.0.1
+-f /tmp/V3__create_accounts.sql
+
+
+Output:
+
+CREATE TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+CREATE INDEX
+INSERT 0 1
+INSERT 0 1
+
+
+Rollback script (not executed, on file):
+`db/rollback/V3__rollback_accounts.sql`
+
+Verification:
+```sql
+SELECT id, user_id, account_number, account_type,
+       balance, is_frozen
+FROM accounts ORDER BY id;
+```
+Result: 2 rows — DSB0000000001 (user 1, SAVINGS),
+DSB0000000002 (user 2, SAVINGS). Both is_frozen=false.
+
+Foreign key confirmed:
+```sql
+INSERT INTO accounts (user_id, ...) VALUES (999, ...);
+-- ERROR: violates foreign key constraint fk_accounts_user_id
+```
+
+Balance check constraint confirmed:
+```sql
+UPDATE accounts SET balance = -1.00 WHERE id = 1;
+-- ERROR: violates check constraint chk_accounts_balance
+```
+
+### §4.4 Application Deployment
+
+Build command (run on Windows laptop):
+
+cd C:\Projects\digistack-bank-parent
+mvn clean package
+
+Result: `BUILD SUCCESS`, produces
+`digistack-bank-ear\target\digistack-bank-v3.ear`.
+
+WAR contents confirmed:
+
+jar tf digistack-bank-web\target\digistack-bank-web-1.0.war
+
+Result: 12 class files confirmed including Account, AccountDao,
+AccountService, InsufficientFundsException, AccountServlet,
+BalanceJsonServlet.
+
+Hand-off to WAS VM:
+
+scp digistack-bank-v3.ear root@192.168.10.10:/tmp/
+scp scripts/v3_deploy.py root@192.168.10.10:/tmp/
+scp scripts/v3_set_classloader.py root@192.168.10.10:/tmp/
+
+
+Deployed via Admin Console (§4.1 steps 2–5) and via
+`v3_deploy.py` (§4.2 step 1) — both paths confirmed working.
+ClassLoader re-applied after fresh install via
+`v3_set_classloader.py`. Server restarted to activate
+ClassLoader settings.
+
+New files in this version:
+- `src/main/webapp/Account.jsp` — deposit/withdraw page
+- `src/main/java/.../servlet/AccountServlet.java`
+- `src/main/java/.../servlet/BalanceJsonServlet.java`
+- `src/main/java/.../model/Account.java`
+- `src/main/java/.../dao/AccountDao.java`
+- `src/main/java/.../service/AccountService.java`
+- `src/main/java/.../exception/InsufficientFundsException.java`
+- `db/migrations/V3__create_accounts.sql`
+- `db/rollback/V3__rollback_accounts.sql`
+- `scripts/v3_deploy.py`
+- `scripts/v3_set_classloader.py`
+- `scripts/v3_verify_logging.py`
+
+Updated files in this version:
+- `src/main/webapp/Dashboard.jsp` — live account card, frozen
+  banner, AJAX balance toggle, Deposit/Withdraw tiles active
+- `src/main/java/.../servlet/DashboardServlet.java` — account
+  data loaded via AccountService on every Dashboard visit
+
+---
+
+## §5 Verification Steps
+
+See `TestCases-v3.md` for full detail. Summary:
+- v1 Regression Pack (13 cases): all Pass
+- v2 Regression Pack (10 cases): all Pass
+- 9/9 Critical v3 cases: Pass
+- 9/9 High v3 cases: Pass
+- 4/4 Medium v3 cases: Pass
+- 2/2 Low v3 cases: Pass
+- Grand total: 47/47 cases Pass
+
+---
+
+## §6 Rollback Procedure
+
+**Option A — VM Snapshot Restore (fastest):**
+1. VMware Workstation → dsb-dmgr → Snapshot → Revert to
+   pre-v3 snapshot.
+2. Repeat for dsb-db if database rollback needed.
+
+**Option B — Manual Undo:**
+1. Stop and uninstall `digistack-bank-v3` via Admin Console.
+2. Restore WAS config from v2 backup:
+
+./stopServer.sh server1 -username wasadmin -password <redacted>
+./restoreConfig.sh
+/opt/backups/was-config/devdsbinappserver01_v2_backup.zip
+./startServer.sh server1
+
+3. Reinstall `digistack-bank-v2.ear` via Admin Console.
+4. Roll back the database:
+
+psql -U digistack_app -d digistack_bank -h 127.0.0.1
+-f db/rollback/V3__rollback_accounts.sql
+
+   Result: `DROP TABLE` — accounts table removed.
+5. Verify: `\dt` in psql shows only `app_config` and `users` —
+   no `accounts` table.
+
+---
+
+## §7 Known Issues / Troubleshooting
+
+| Issue | Cause | Resolution |
+|---|---|---|
+| Dashboard balance shows "View in Account" instead of amount | `/BalanceJson` returned null — DB connection failed or session expired | Confirm PostgreSQL running on dsb-db, confirm session still active, check SystemOut.log for BalanceJsonServlet errors |
+| ClassLoader settings reset after fresh install | AdminApp.install() resets ClassLoader to WAS defaults | Always re-run `v3_set_classloader.py` after any fresh install (not needed for updates) |
+| Deposit/Withdraw buttons disabled even when account not frozen | JSP compiled ClassLoader issue — old version of Account.class loaded | Stop/Start the application via Admin Console to force class reload |
+
+**Known Technical Debt (carried forward):**
+- Direct JDBC with hardcoded credentials in AccountService,
+  DashboardServlet — replaced at v7 with JNDI DataSource
+  (jdbc/BankDS)
+- App-layer authentication only — WAS security roles at v10
+- No transaction history table yet — Deposit/Withdraw amounts
+  are not persisted beyond the balance update (deferred)
+
+---
+
+## §8 Sign-off Table
+
+| Item | Status |
+|---|---|
+| Setup completed | ✅ |
+| Verification passed | ✅ (47/47 test cases — see TestCases-v3.md) |
+| Documentation reviewed | ✅ |
+| backupConfig baseline captured | ✅ — `devdsbinappserver01_v3_backup.zip` |
+| Smoke test passed | ✅ — 9/9 checks |
+| Reviewed by | _________________ |
+| Approved date | _________________ |
+
+---
+
+*This is SetupDoc-v3.md. Companion: TestCases-v3.md (test detail),
+FaultDrill-v3.md (Sprint 8, non-gating).*

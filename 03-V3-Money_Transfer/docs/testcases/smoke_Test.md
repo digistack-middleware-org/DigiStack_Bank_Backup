@@ -1,11 +1,23 @@
-# Smoke Test Checklist – digistack-bank-v2
+# When we Do the Smoke Test
+We Do the Smoke test after Deploy into the New Environment
 
-| #  | Test Case                | Steps / Location                                                                 | Expected Result                                      | Status |
-|----|--------------------------|----------------------------------------------------------------------------------|------------------------------------------------------|--------|
-| 1  | Admin Console reachable  | Browser → http://192.168.10.10:9060/ibm/console                                  | Login page loads                                     | ☐      |
-| 2  | server1 Started          | Admin Console → Servers → WebSphere application servers                          | Green arrow next to server1                          | ☐      |
-| 3  | digistack-bank-v2 Started| Admin Console → Applications → WebSphere enterprise applications                 | Green arrow next to digistack-bank-v2 | ☐      |
-| 4  | Home page loads          | Browser → http://192.168.10.10:9080/digistack-bank/Home                          | Page renders, Database: Connected green              | ☐      |
-| 5  | Login page loads         | Browser → http://192.168.10.10:9080/digistack-bank/Login                         | Welcome Back card renders                            | ☐      |
-| 6  | Login succeeds           | Enter customer1 / Customer@123 → Sign In                                         | Dashboard renders with greeting and last login       | ☐      |
-| 7  | Logout works             | Click Logout on Dashboard                                                        | Redirected to Home, session destroyed                | ☐      |
+Smoke test again when:
+
+    Server restarted / crashed and recovered
+    Database patched or migrated
+    Configuration changed (JNDI datasource, connection pool, JVM settings)
+    Middleware upgraded (e.g., WebLogic patch)
+
+
+# Smoke Test Checklist – digistack-bank-v3
+| # | Check | How | Expected Result |
+|---|-------|-----|-----------------|
+| 1 | Admin Console reachable | Browser → port 9060 | Login page loads |
+| 2 | server1 Started | Admin Console → Servers | Green arrow |
+| 3 | digistack-bank-v3 Started | Admin Console → Applications | Green arrow |
+| 4 | Home page loads | Browser → /digistack-bank/Home | Database: Connected green |
+| 5 | Login succeeds | customer1 / Customer@123 | Dashboard renders |
+| 6 | Dashboard account card | Observe after login | SAVINGS + masked number shown |
+| 7 | Deposit works | Account page → deposit ₹500 | Success banner, balance updated |
+| 8 | Withdraw works | Account page → withdraw ₹500 | Success banner, balance unchanged net |
+| 9 | Logout works | Click Logout | Redirected to Home |

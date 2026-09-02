@@ -2,12 +2,14 @@
   ### A user logs in, sees their live account on the Dashboard, deposits or withdraws money
 
   ## Request Flow
-```
+
+<img src="images/V3-Layer-Layer-Flow.png" width="800">
 
 
-
-```
    ## Layer-by-Layer Request Flow
+
+<img src="images/V3-Layer-Layer-Flow.png" width="800">
+
 ```
 
         BROWSER

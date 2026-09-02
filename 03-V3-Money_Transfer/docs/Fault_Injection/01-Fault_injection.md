@@ -1,104 +1,86 @@
-# Fault Injection Lab — Corrupting `customer1` Credentials (digistack-bank)
+# Fault Injection Lab — SystemOut.log Permission Fault
 
-## Step 1 — Confirm the Environment is Clean Before Injecting
+## Step 1 — Confirm the environment is clean before injecting
 
-On the **dsb-dmgr VM**, run:
-
-```bash
-curl -s -o /dev/null -w "%{http_code}" \
-  http://192.168.10.10:9080/digistack-bank/Home
-```
-
-**Expected result before injection:**
-
-```
-200
-```
-
-Then confirm login works:
+On the **dsb-dmgr** VM:
 
 ```bash
 curl -s -o /dev/null -w "%{http_code}" \
-  http://192.168.10.10:9080/digistack-bank/Login
+  http://192.168.10.10:9080/digistack-b/Home
 ```
-
-**Expected result:**
-
+Expected result before injection:
 ```
 200
 ```
-
-> ⚠️ If either returns anything other than `200`, **stop and report before continuing.**
-
----
-
-## Step 2 — Inject the Fault
-
-Run:
-
-```bash
+Then confirm the account balance reads correctly from the DB:
+```
 psql -U digistack_app -d digistack_bank -h 127.0.0.1 \
-  -c "UPDATE users SET password_hash = 'CORRUPTED' WHERE username = 'customer1';"
+  -c "SELECT id, balance, is_frozen FROM accounts user_id = 1;"
 ```
 
-- Enter the password `D!g!St@ck2026#` when prompted.
-
-**Expected result:**
-
+Expected result — one row showing a positive balance and is_frozen = f:
 ```
-UPDATE 1
-```
-
----
-
-## Step 3 — Confirm the Injection Was Applied
-
-```bash
-psql -U digistack_app -d digistack_bank -h 127.0.0.1 \
-  -c "SELECT username, password_hash FROM users WHERE username = 'customer1';"
-```
-
-**Expected result — `password_hash` column shows:**
-
-```
- username  | password_hash
------------+--------------
- customer1 | CORRUPTED
+ id |  balance  | is_frozen
+----+-----------+-----------
+  1 | XXXXX.00  | f
 (1 row)
 ```
+    ⚠️ If the environment is not clean, stop and escalate before continuing.
 
----
+Step 2 — Inject the fault
 
-## Step 4 — Trigger the Fault
-
-Open your browser and attempt to log in:
-
+Run this command on the dsb-dmgr VM:
 ```
-http://192.168.10.10:9080/digistack-bank/Login
+chmod 000 \
+  /apps/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log
 ```
+No output is expected. That is correct.
 
-Enter:
+Step 3 — Confirm the injection was applied
+```
+ -lh \
+  /apps/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log
+```
+Expected result — permissions show ----------:
 
-| Field    | Value         |
-|----------|---------------|
-| Username | `customer1`   |
-| Password | `Customer@123` |
+---------- 1 root root ... SystemOut.log
 
-Click **Sign In**.
+Step 4 — Trigger the fault
+Step 4.1
 
-> 👀 **Observe what happens. Do not diagnose yet — just note what you see.**
+Open your browser and log in as customer1 / Customer@123.
+Step 4.2
 
----
+Navigate to the Account page and attempt a deposit of ₹1,000.
 
-## Step 5 — Confirm the `admin1` Account is Unaffected
+👉 Observe what happens in the browser. Note it down.
+Step 4.3
 
-On the login page, enter:
+On the dsb-dmgr VM, attempt to read the log:
+```
+tail -20 \
+  /apps/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log
+```
+👉 Observe what happens. Note it down.
+Step 4.
 
-| Field    | Value       |
-|----------|-------------|
-| Username | `admin1`    |
-| Password | `Admin@123` |
+Attempt to grep the log for AccountServlet entries:
+```
+grep "AccountServlet" \
+  /apps/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log
+```
+👉 Observe what happens. Note it down.
 
-Click **Sign In**.
 
-> 👀 **Observe what happens. Note it down.**
+**⚠️ One important note:** The content contains nested code blocks (```bash inside ```markdown), so **don't paste the outer ```markdown fence** into GitHub. Copy everything *between* the outer fence only — GitHub will render it correctly.
+
+**Optional addition:** You can add an observations table at the end for recording results:
+
+```markdown
+## Observations Log
+
+| Step | Observation | Result |
+|------|-------------|--------|
+| 4.2  | Browser behavior on deposit | |
+| 4.3  | tail output | |
+| 4.4  | grep output | |

@@ -1,92 +1,119 @@
-# Fix — Restore the Environment
+# ✅ Fix — Restore the Environment (INC-v3-001)
 
-## Step 1 — Restore the Correct Hash (on Windows laptop)
+## Step 1 — Restore the correct permissions
 
-Run the `SeedUsers` utility — it recomputes and restores the correct hash automatically:
+On the **dsb-dmgr** VM:
 
 ```bash
-java -cp "digistack-bank-web\target\classes;C:\Tools\postgresql-42.7.3.jar" ^
-  com.digistack.bank.util.SeedUsers
+chmod 640 \
+  /opt/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log
+```
+
+> 💡 **Concept — `chmod 640`:** Owner (WAS process / root) gets read+write (`6`), group gets read-only (`4`), others get nothing (`0`). This is the standard permission for a log file owned by the WAS process user — readable by the admin group for monitoring, writable only by the owner.
+
+No output is expected. That is correct.
+
+---
+
+## Step 2 — Confirm permissions are restored
+
+```bash
+ls -lh \
+  /opt/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log
 ```
 
 **Expected result:**
 
 ```
-Connected to digistack_bank on dsb-db.
-Updated customer1 with correct password hash.
-Updated admin1 with correct password hash.
-Seed complete. Both users ready for login.
+-rw-r----- 1 root root 2.1M ... SystemOut.log
 ```
 
-## Step 2 — Verify the Hash Is Restored (on dsb-db VM)
+`-rw-r-----` = owner read+write, group read, others none. ✅ Correct.
+
+---
+
+## Step 3 — Confirm the log is now readable
 
 ```bash
-psql -U digistack_app -d digistack_bank -h 127.0.0.1 \
-  -c "SELECT username, LENGTH(password_hash) AS hash_len FROM users;"
-```
+tail -20 \
+  /opt/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log
+``**Expected result:** The last 20 lines of the log appear **without a permission error**. You should see WAS startup messages and servlet init lines.
 
-**Expected result:**
+---
 
-```
- username  | hash_len
------------+----------
- customer1 |       64
- admin1    |       64
-(2 rows)
-```
+## Step 4 — Force WAS to write a fresh log entry
 
-Both rows show `hash_len = 64` — valid SHA-256 hashes.
-
-## Step 3 — Confirm Login in the Browser
-
-Go to:
+Open the browser and navigate to:
 
 ```
-http://192.168.10.10:9080/digistack-bank/Login
-```
-
-Log in with `customer1` / `Customer@123` → click **Sign In**.
-
-**Expected result:** Dashboard loads with greeting and last login timestamp. ✅ Login fully restored.
-
-## Step 4 — Confirm in the Logs (on dsb-dmgr VM)
-
-```bash
-grep "LoginServlet" \
-  /opt/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log \
-  | tail -5
-```
-
-**Expected result:**
-
-```
-LoginServlet: Login successful for user: customer1 role: CUSTOMER
+http://192.168.10.10:9080/digistack-bank/Home
 ```
 
 ---
 
-# Prevention
+## Step 5 — Confirm new entries are appearing
 
-### 1. Check the log first — always
-If a user insists their password is correct but the log says *"wrong password"*, go inspect the **database row** — not the application code.
-
-### 2. Hash length validation query
-A quick sanity check — valid SHA-256 hashes are always 64 characters:
-
-```sql
-SELECT username FROM users
-WHERE LENGTH(password_hash) != 64;
+```bash
+tail -5 \
+  /opt/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log
 ```
 
-Any row returned = corrupted hash. Run it as a daily DB health check from v2 onward.
+**Expected result:** You see **new timestamped entries** after the page load. The log is live again. ✅
 
-### 3. Database audit logging
-Enable PostgreSQL's `pgaudit` extension to log every `UPDATE` on the `users` table (who, when, from where). The injected `UPDATE` would show up in the logs immediately.
+---
 
-### 4. Principle of least privilege
-`digistack_app` currently has ALL privileges — fine for dev, risky for production. In production:
-- App user gets only `SELECT, INSERT, UPDATE` on specific columns.
-- `UPDATE` on `password_hash` restricted to a dedicated credential-management role.
+## Step 6 — Confirm AccountServlet transactions are logging correctly
 
-### 5. From v10 onward (WAS Security)
-Credential management moves into the WAS security domain. A corrupted hash in the DB would still fail WAS's own credential checks — adding another layer of protection.
+Perform a small deposit (**100**) in the browser, then:
+
+```bash
+grep "AccountServlet" \
+  /opt/IBM/WebSphere/AppServer/profiles/devdsbinappserver01/logs/server1/SystemOut.log \
+  | tail -3
+```
+
+**Expected result:**
+
+```
+AccountServlet: Deposit successful. userId=1 amount=100 newBalance=₹XXXXX.XX
+```
+
+The audit trail is restored. ✅
+
+---
+
+## 🛡️ Prevention
+
+### 1. Check file permissions as the FIRST diagnostic step
+On any **"log gone silent"** alert, the sequence is:
+
+```
+alert fires → ls -lh SystemOut.log → ---------- permissions = immediate diagnosis
+```
+
+The entire investigation should take **under 60 seconds** once you know this pattern.
+
+### 2. `lsof` to confirm the JVM is still holding the file open
+If permissions are wrong but the process still has the file descriptor open from before the `chmod`, some writes may still succeed (on Linux, **open file descriptors survive permission changes**). If the descriptor was also closed — for example after a log rotation — no writes would succeed at all. `lsof` immediately distinguishes these two cases.
+
+### 3. Immutable file attributes as a guard
+In production, critical log files are often protected with `chattr +a` (**append-only attribute**) — this prevents `chmod`, `rm`, and overwrite operations while still allowing the logging process to append. A junior admin running `chmod 000` on an append-only file would get:
+
+```
+Operation not permitted
+```
+
+### 4. Separate log monitoring user with read-only access
+The monitoring pipeline's tailer process should run as a **dedicated low-privilege user** with read-only access to the logs directory. When that user receives `Permission denied`, the alert fires. This is exactly what happened here — the monitoring pipeline was the only thing that caught the fault### 5. Observability (P04 onward)
+- **Prometheus + Grafana** — monitors the WAS JVM's own metrics including log write errors and file descriptor counts.
+- **OpenSearch** — ingests log lines; a sudden drop in ingestion rate from a healthy JVM triggers a **"log pipeline broken"** alert automatically, regardless of whether the external tailer is running.
+
+### 6. Audit trail for chmod operations on log directories
+The Linux audit daemon (`auditd`) can log every `chmod` or `chown` call on the WAS logs directory:
+
+```bash
+auditctl -w /opt/IBM/WebSphere/AppServer/profiles/ \
+  -p wa -k was_log_changes
+```
+
+This would have immediately identified **which user ran the `chmod 000` and when** — closing the *"a junior admin did a routine log rotation check"* ambiguity in the incident ticket.
