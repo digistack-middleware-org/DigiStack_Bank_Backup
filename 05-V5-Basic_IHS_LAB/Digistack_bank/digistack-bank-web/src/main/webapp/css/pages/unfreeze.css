@@ -1,0 +1,69 @@
+/*
+ * unfreeze.css — DigiStack Bank P01 v6
+ * Styles specific to Unfreeze.jsp.
+ * Mirror of freeze.css — green confirm card, green button.
+ */
+
+.status-card {
+    background: white;
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    animation: fadeInUp 0.5s ease-out both;
+    margin-bottom: 20px;
+}
+.status-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--db-navy);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ── Confirm Card — green top border signals a restorative action ── */
+.confirm-card {
+    background: white;
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    animation: fadeInUp 0.5s ease-out 0.1s both;
+    border-top: 4px solid #28a745;
+}
+.confirm-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--db-navy);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ── Unfreeze Button ── */
+.btn-unfreeze {
+    background: linear-gradient(135deg, #1a6b3a, #28a745);
+    color: white;
+    font-weight: 700;
+    padding: 12px 32px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    transition: opacity 0.2s, transform 0.15s;
+}
+.btn-unfreeze:hover { opacity: 0.9; transform: translateY(-1px); color: white; }
+
+/* ── Cancel Button ── */
+.btn-cancel {
+    background: var(--db-light-bg);
+    color: var(--db-navy);
+    font-weight: 600;
+    padding: 12px 28px;
+    border: 1.5px solid #dde3ed;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+.btn-cancel:hover { background: #e2e8f4; color: var(--db-navy); }

@@ -14,11 +14,14 @@
     </parent>
 
     <artifactId>digistack-bank-web</artifactId>
+
     <!-- packaging: war tells Maven to produce a .war file -->
     <packaging>war</packaging>
+
     <name>DigiStack Bank - Web</name>
 
     <dependencies>
+
         <!-- Java EE Web API for Servlet and JSP compilation -->
         <dependency>
             <groupId>javax</groupId>
@@ -36,23 +39,68 @@
             <artifactId>postgresql</artifactId>
             <scope>provided</scope>
         </dependency>
+
+        <!-- ═══════════════════════════════════════════════════
+             UNIT TESTING — JUnit 5 + Mockito
+             Added at P01 v6 per standing rule TEST01.
+             scope=test means these JARs are NOT packaged into
+             the final WAR — they exist only during `mvn test`.
+             ═══════════════════════════════════════════════════ -->
+
+        <!-- JUnit 5 (Jupiter) — the test-writing and test-running engine -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.2</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Mockito 4.11.0 — compatible with Java 8 -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>4.11.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Mockito JUnit 5 integration -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>4.11.0</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
         <plugins>
+
             <plugin>
                 <!-- Controls how Maven packages the WAR file -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>3.4.0</version>
+
                 <configuration>
+
                     <!-- The final WAR file name (without .war extension) -->
                     <warName>digistack-bank-web</warName>
+
                     <!-- web.xml is required — tells Maven not to fail if
                          it doesn't auto-detect one (we provide it manually) -->
                     <failOnMissingWebXml>true</failOnMissingWebXml>
+
                 </configuration>
             </plugin>
+
+            <!-- Runs JUnit 5 tests during `mvn test` and `mvn package` -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+            </plugin>
+
         </plugins>
     </build>
 

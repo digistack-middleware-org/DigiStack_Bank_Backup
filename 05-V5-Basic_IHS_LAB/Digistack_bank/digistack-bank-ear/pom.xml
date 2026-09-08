@@ -40,7 +40,7 @@
                     <!-- Java EE version for the EAR descriptor -->
                     <version>7</version>
                     <!-- The final EAR file name — this is what you deploy to WAS -->
-                    <finalName>digistack-bank-v4</finalName>
+                    <finalName>digistack-bank-v5</finalName>
                     <modules>
                         <webModule>
                             <!-- Tells the EAR which WAR to include -->

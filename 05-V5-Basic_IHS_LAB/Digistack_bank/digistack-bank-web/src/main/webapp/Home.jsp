@@ -13,7 +13,8 @@
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
           rel="stylesheet">
-
+    <link rel="stylesheet" href="css/common/common.css">
+    <link rel="stylesheet" href="css/pages/home.css">
     <style>
         /* ── DigiStack Brand Colours ── */
         :root {
@@ -309,7 +310,7 @@
                 </li>
             </ul>
             <div class="d-flex gap-2 align-items-center">
-                <a href="Login.jsp" class="btn btn-login-nav">
+                <a href="Login" class="btn btn-login-nav">
                     <i class="bi bi-person-circle me-1"></i>Login
                 </a>
                 <span class="btn btn-outline-secondary btn-sm disabled"
@@ -341,7 +342,7 @@
                     all from one secure, modern banking platform.
                 </p>
                 <div class="hero-buttons d-flex flex-wrap gap-3">
-                    <a href="Login.jsp" class="btn-hero-primary">
+                    <a href="Login" class="btn-hero-primary">
                         <i class="bi bi-box-arrow-in-right me-2"></i>Login to NetBanking
                     </a>
                     <span class="btn-hero-outline">
@@ -417,7 +418,7 @@
                     </div>
                     <h5>My Accounts</h5>
                     <p>View balances, account details, and full transaction history in real time.</p>
-                    <a href="Login.jsp" class="feature-link" style="opacity:1;cursor:pointer;text-decoration:underline;">
+                    <a href="Login" class="feature-link" style="opacity:1;cursor:pointer;text-decoration:underline;">
                         Login to view →
                     </a>
                 </div>
@@ -472,7 +473,7 @@
         <p class="mb-0" style="font-size:0.78rem;">
             &copy; 2026 DigiStack Bank. For educational purposes only.
             &nbsp;|&nbsp; WebSphere ND 9.0.5.28
-            &nbsp;|&nbsp; v4 — Application Lifecycle
+            &nbsp;|&nbsp; v5 — WAS Clustering
         </p>
     </div>
 </footer>

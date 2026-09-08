@@ -13,7 +13,8 @@
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
           rel="stylesheet">
-
+    <link rel="stylesheet" href="css/common/common.css">
+    <link rel="stylesheet" href="css/pages/dashboard.css">
     <style>
         :root {
             --db-navy:      #0b2545;
@@ -462,8 +463,12 @@
                 <div class="frozen-banner"
                      style="display:block;">
                     <i class="bi bi-lock-fill me-2"></i>
-                    Your account is frozen — please contact
-                    support to restore access.
+                    Your account is frozen.
+                    <a href="Unfreeze"
+                       style="color:#856404;font-weight:700;">
+                        Unfreeze your account
+                    </a>
+                    to restore access.
                 </div>
                 <% } %>
 
@@ -495,7 +500,12 @@
                                 margin-bottom:16px;font-size:0.82rem;
                                 color:#ffc107;font-weight:600;">
                         <i class="bi bi-lock-fill me-2"></i>
-                        Your account is frozen — please contact support.
+                        Your account is frozen.
+                        <a href="Unfreeze"
+                           style="color:#ffc107;font-weight:700;
+                                  text-decoration:underline;">
+                            Unfreeze
+                        </a>
                     </div>
                     <% } %>
 
@@ -531,7 +541,7 @@
                 <div class="section-title">Quick Actions</div>
                 <div class="quick-actions-row mb-4">
 
-                    <a href="Account" class="quick-action-tile">
+                    <a href="Deposit" class="quick-action-tile">
                         <div class="tile-icon"
                              style="background:#e8f4fd;">
                             <i class="bi bi-arrow-down-circle"
@@ -543,7 +553,7 @@
                         </div>
                     </a>
 
-                    <a href="Account" class="quick-action-tile">
+                    <a href="Withdraw" class="quick-action-tile">
                         <div class="tile-icon"
                              style="background:#fff3e0;">
                             <i class="bi bi-arrow-up-circle"
@@ -654,7 +664,7 @@
 <footer class="dsb-footer">
     <div class="container">
         <strong>DigiStack Bank</strong> &mdash;
-        &copy; 2026. For educational purposes only. v4
+        &copy; 2026. For educational purposes only. v5
     </div>
 </footer>
 
