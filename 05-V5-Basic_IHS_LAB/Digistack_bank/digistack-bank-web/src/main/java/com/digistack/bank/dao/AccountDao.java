@@ -9,30 +9,28 @@ import java.sql.SQLException;
 import com.digistack.bank.model.Account;
 
 /**
- * AccountDao — P01 v6 (updated from v3)
+ * AccountDao — P01 v3
  *
  * Data Access Object for the accounts table.
  * All SQL for account operations lives here and nowhere else.
  *
- * v6 additions:
- *   - freeze(conn, accountId)   — sets is_frozen = TRUE
- *   - unfreeze(conn, accountId) — sets is_frozen = FALSE
- *
  * Design:
  *   - Every method receives a Connection parameter.
- *     The caller (Service layer) owns and manages the connection
+ *     The caller (AccountService) owns and manages the connection
  *     lifecycle — open once, pass to DAO, close in a finally block.
+ *     This prepares for connection-pool management at v7 (JNDI).
  *   - Every method uses PreparedStatement — never string-concatenated
  *     SQL. Prevents SQL injection attacks.
  *   - Returns null when a record is not found (not an exception).
  *     The Service layer decides what a missing record means.
  *
- * TECHNICAL DEBT (v3–v6): Connection is direct JDBC passed from Service.
+ * TECHNICAL DEBT (v3): Connection is direct JDBC passed from Service.
  * At v7: replaced with WAS-managed JNDI DataSource (jdbc/BankDS).
  */
 public class AccountDao {
 
-    // ── SELECT statements ──────────────────────────────────────────────
+    // SQL statements — all defined as constants at the top.
+    // Never build SQL strings with + concatenation of user input.
 
     private static final String SQL_FIND_BY_USER_ID =
         "SELECT id, user_id, account_number, account_type, " +
@@ -48,8 +46,6 @@ public class AccountDao {
         "FROM accounts " +
         "WHERE id = ?";
 
-    // ── UPDATE — balance operations ────────────────────────────────────
-
     private static final String SQL_DEPOSIT =
         "UPDATE accounts " +
         "SET balance    = balance + ?, " +
@@ -64,31 +60,6 @@ public class AccountDao {
         "WHERE id = ? " +
         "AND   is_frozen = FALSE " +
         "AND   balance >= ?";
-
-    // ── UPDATE — freeze operations (v6) ───────────────────────────────
-
-    /**
-     * Sets is_frozen = TRUE for the given account.
-     * No balance check required — freezing is always allowed
-     * regardless of current balance.
-     */
-    private static final String SQL_FREEZE =
-        "UPDATE accounts " +
-        "SET is_frozen  = TRUE, " +
-        "    updated_at = NOW() " +
-        "WHERE id = ?";
-
-    /**
-     * Sets is_frozen = FALSE for the given account.
-     * Restores the account to operational status.
-     */
-    private static final String SQL_UNFREEZE =
-        "UPDATE accounts " +
-        "SET is_frozen  = FALSE, " +
-        "    updated_at = NOW() " +
-        "WHERE id = ?";
-
-    // ── Public methods ─────────────────────────────────────────────────
 
     /**
      * Finds the primary account for a given user.
@@ -143,8 +114,6 @@ public class AccountDao {
     /**
      * Deposits an amount into an account.
      * Only succeeds if the account is not frozen.
-     * The is_frozen = FALSE check is enforced in the SQL WHERE clause —
-     * the database is the final guard, not just the Java layer.
      *
      * @param conn      Active database connection
      * @param accountId The account's primary key
@@ -164,6 +133,8 @@ public class AccountDao {
             ps.setInt(2, accountId);
 
             int rowsAffected = ps.executeUpdate();
+            // Exactly 1 row updated = success.
+            // 0 rows = account frozen or not found.
             return rowsAffected == 1;
         }
     }
@@ -173,7 +144,8 @@ public class AccountDao {
      * Only succeeds if:
      *   (a) The account is not frozen, AND
      *   (b) The current balance is >= the withdrawal amount.
-     * Both conditions are enforced in the SQL WHERE clause.
+     * Both conditions are enforced in the SQL WHERE clause —
+     * the DB acts as the final check, not just the Java layer.
      *
      * @param conn      Active database connection
      * @param accountId The account's primary key
@@ -197,56 +169,6 @@ public class AccountDao {
             return rowsAffected == 1;
         }
     }
-
-    /**
-     * Freezes an account — sets is_frozen = TRUE.
-     *
-     * Called by FreezeService (UI path) and by the wsadmin
-     * Jython script (admin ops path). Both paths land here.
-     *
-     * @param conn      Active database connection
-     * @param accountId The account's primary key
-     * @return          true if exactly 1 row was updated
-     *                  false if the account ID was not found
-     */
-    public boolean freeze(Connection conn, int accountId)
-            throws SQLException {
-
-        try (PreparedStatement ps =
-                conn.prepareStatement(SQL_FREEZE)) {
-
-            ps.setInt(1, accountId);
-
-            int rowsAffected = ps.executeUpdate();
-            return rowsAffected == 1;
-        }
-    }
-
-    /**
-     * Unfreezes an account — sets is_frozen = FALSE.
-     *
-     * Called by FreezeService (UI path) and by the wsadmin
-     * Jython script (admin ops path). Both paths land here.
-     *
-     * @param conn      Active database connection
-     * @param accountId The account's primary key
-     * @return          true if exactly 1 row was updated
-     *                  false if the account ID was not found
-     */
-    public boolean unfreeze(Connection conn, int accountId)
-            throws SQLException {
-
-        try (PreparedStatement ps =
-                conn.prepareStatement(SQL_UNFREEZE)) {
-
-            ps.setInt(1, accountId);
-
-            int rowsAffected = ps.executeUpdate();
-            return rowsAffected == 1;
-        }
-    }
-
-    // ── Private helpers ────────────────────────────────────────────────
 
     /**
      * Maps a ResultSet row to an Account object.

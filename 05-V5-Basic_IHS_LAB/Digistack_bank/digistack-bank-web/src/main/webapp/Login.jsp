@@ -12,8 +12,7 @@
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css"
           rel="stylesheet">
-    <link rel="stylesheet" href="css/common/common.css">
-    <link rel="stylesheet" href="css/pages/login.css">
+
     <style>
         :root {
             --db-navy: #0b2545;
@@ -331,7 +330,7 @@
 <footer class="dsb-footer">
     <div class="container">
         <strong>DigiStack Bank</strong> &mdash;
-        &copy; 2026. For educational purposes only. v5
+        &copy; 2026. For educational purposes only. v4
     </div>
 </footer>
 
