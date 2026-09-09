@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    application.xml — DigiStack Bank EAR descriptor
+    Java EE 7 — matches WAS ND 9.0.5.x
+
+    This file tells WAS:
+      1. The display name shown in the Admin Console under
+         Applications → WebSphere enterprise applications.
+      2. Which WAR file is inside the EAR (web-uri).
+      3. What URL context root to map it to (context-root).
+
+    Why not let maven-ear-plugin generate this automatically?
+    Auto-generation would produce a generic descriptor without
+    the explicit display-name and description we want to appear
+    in WAS Admin Console. Supplying it manually means every
+    future version just updates the description here — the WAS
+    admin always knows exactly which version is deployed.
+-->
+<application
+    xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+                        http://xmlns.jcp.org/xml/ns/javaee/application_7.xsd"
+    version="7">
+
+    <!--
+        This name appears in WAS Admin Console under:
+        Applications → Application Types →
+        WebSphere enterprise applications
+        Make it descriptive and version-specific so the admin
+        can see at a glance which version is deployed.
+    -->
+    <display-name>DigiStack Bank v6</display-name>
+
+    <description>
+        DigiStack Bank — P01 v6 Application Administration.
+        Features: Freeze/Unfreeze account, wsadmin scripting,
+        Node Sync and Full Resync. Deployed on WAS ND 9.0.5.28.
+    </description>
+
+    <!--
+        One module entry per WAR inside the EAR.
+        This project has exactly one WAR at this stage.
+        Future versions (Transfer, Bill Pay, etc.) may add
+        more <module> entries here.
+    -->
+    <module>
+        <web>
+            <!--
+                web-uri: the filename of the WAR inside the EAR.
+                Must exactly match <bundleFileName> in the EAR pom.xml.
+            -->
+            <web-uri>digistack-bank-web.war</web-uri>
+
+            <!--
+                context-root: the URL path prefix.
+                With /digistack-bank here, the app is accessible at:
+                  http://192.168.10.20/digistack-bank/Home
+                  http://192.168.10.20/digistack-bank/Dashboard
+                  http://192.168.10.20/digistack-bank/Deposit
+                  etc.
+            -->
+            <context-root>/digistack-bank</context-root>
+        </web>
+    </module>
+
+</application>

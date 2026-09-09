@@ -1,0 +1,86 @@
+/*
+ * deposit.css — DigiStack Bank P01 v6
+ * Styles specific to Deposit.jsp.
+ */
+
+/* ── Form Card ── */
+.form-card {
+    background: white;
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    animation: fadeInUp 0.5s ease-out 0.1s both;
+    margin-bottom: 20px;
+}
+.form-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--db-navy);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ── Form Fields ── */
+.form-label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--db-navy);
+    margin-bottom: 6px;
+}
+.form-control {
+    border: 1.5px solid #dde3ed;
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-size: 0.95rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-control:focus {
+    border-color: var(--db-navy);
+    box-shadow: 0 0 0 3px rgba(11,37,69,0.08);
+}
+.input-prefix {
+    background: var(--db-light-bg);
+    border: 1.5px solid #dde3ed;
+    border-right: none;
+    border-radius: 10px 0 0 10px;
+    padding: 11px 14px;
+    color: #666;
+    font-weight: 600;
+}
+.input-prefix + .form-control { border-radius: 0 10px 10px 0; }
+
+/* ── Quick Amount Buttons ── */
+.quick-amounts {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+.btn-quick-amount {
+    background: var(--db-light-bg);
+    border: 1.5px solid #dde3ed;
+    border-radius: 8px;
+    padding: 5px 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--db-navy);
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s;
+}
+.btn-quick-amount:hover { background: #e2e8f4; border-color: var(--db-navy); }
+
+/* ── Deposit Button ── */
+.btn-deposit {
+    background: linear-gradient(135deg, #1a6b3a, #28a745);
+    color: white;
+    font-weight: 700;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    transition: opacity 0.2s, transform 0.15s;
+    width: 100%;
+}
+.btn-deposit:hover { opacity: 0.9; transform: translateY(-1px); color: white; }

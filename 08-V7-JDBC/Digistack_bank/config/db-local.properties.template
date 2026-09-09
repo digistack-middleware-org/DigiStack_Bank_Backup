@@ -1,0 +1,11 @@
+# db-local.properties.template — DigiStack Bank
+#
+# Copy this file to config/db-local.properties and fill in real values.
+# db-local.properties is gitignored — never committed to source control.
+#
+# Used by: SeedUsers.java (standalone utility, runs on dev laptop)
+# NOT used by: the deployed application (that uses jdbc/BankDS JNDI DataSource)
+
+db.url=jdbc:postgresql://<DB_HOST>:5432/digistack_bank
+db.user=<DB_USERNAME>
+db.password=<DB_PASSWORD>

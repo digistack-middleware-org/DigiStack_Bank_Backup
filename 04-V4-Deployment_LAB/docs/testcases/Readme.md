@@ -1,4 +1,48 @@
 # 🧪 Test Verification Matrix — by Stage
+```
+DEVELOPMENT
+    │
+    ├── Unit / Component Tests
+    ├── Developer Tests
+    └── Code Quality / Security Checks
+    │
+    ▼
+SIT / TEST
+    │
+    ├── API Tests
+    ├── Integration Tests
+    ├── Database Tests
+    ├── Middleware Tests
+    ├── End-to-End Tests
+    ├── Negative Tests
+    └── Regression Tests
+    │
+    ▼
+UAT
+    │
+    ├── Business Process Tests
+    ├── Customer Journey Tests
+    ├── Financial / Accounting Validation
+    └── Business Acceptance
+    │
+    ▼
+PRE-PRODUCTION
+    │
+    ├── Production-like Smoke
+    ├── Performance
+    ├── Security
+    ├── DR / Recovery
+    ├── Operational Readiness
+    └── Deployment / Rollback
+    │
+    ▼
+PRODUCTION
+    │
+    ├── Smoke Test
+    ├── Sanity Test
+    ├── Monitoring Verification
+    └── Business Validation
+```
 
 ## 🔧 DEV — "Build it right"
 

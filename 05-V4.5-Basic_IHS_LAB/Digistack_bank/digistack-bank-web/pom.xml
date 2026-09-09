@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- Inherits groupId, version, and settings from the parent -->
+    <parent>
+        <groupId>com.digistack</groupId>
+        <artifactId>digistack-bank-parent</artifactId>
+        <version>1.0</version>
+    </parent>
+
+    <artifactId>digistack-bank-web</artifactId>
+    <!-- packaging: war tells Maven to produce a .war file -->
+    <packaging>war</packaging>
+    <name>DigiStack Bank - Web</name>
+
+    <dependencies>
+        <!-- Java EE Web API for Servlet and JSP compilation -->
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-web-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- PostgreSQL JDBC Driver.
+             Scope: provided — the JAR is already placed on the WAS server
+             at lib/ext/jdbc/postgresql-42.7.3.jar. Maven uses it to
+             compile HomeServlet.java but does NOT package it into the WAR.
+             At v7 this dependency is removed in favour of WAS-managed JNDI. -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <!-- Controls how Maven packages the WAR file -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.4.0</version>
+                <configuration>
+                    <!-- The final WAR file name (without .war extension) -->
+                    <warName>digistack-bank-web</warName>
+                    <!-- web.xml is required — tells Maven not to fail if
+                         it doesn't auto-detect one (we provide it manually) -->
+                    <failOnMissingWebXml>true</failOnMissingWebXml>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

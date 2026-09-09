@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ============================================================
+         Parent POM — DigiStack Bank
+         Coordinates every child module's build in one command.
+         ============================================================ -->
+    <groupId>com.digistack</groupId>
+    <artifactId>digistack-bank-parent</artifactId>
+    <version>1.0</version>
+    <packaging>pom</packaging>
+
+    <name>DigiStack Bank - Parent</name>
+    <description>Parent POM for DigiStack Bank multi-module project</description>
+
+    <!-- Child modules — Maven builds these in order -->
+    <modules>
+        <module>digistack-bank-web</module>
+        <module>digistack-bank-ear</module>
+    </modules>
+
+    <properties>
+        <!-- Java 8 — matches IBM Java 8 bundled with WAS ND 9.0.5.x -->
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Java EE 7 Web API — provides Servlet, JSP APIs for compilation.
+                 "provided" scope = available at compile time but NOT packaged
+                 into the WAR/EAR because WebSphere already provides these
+                 at runtime. -->
+            <dependency>
+                <groupId>javax</groupId>
+                <artifactId>javaee-web-api</artifactId>
+                <version>7.0</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- PostgreSQL JDBC Driver — used from Sprint 3 onward.
+                 Declared here so the version is managed in one place. -->
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>42.7.3</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>
