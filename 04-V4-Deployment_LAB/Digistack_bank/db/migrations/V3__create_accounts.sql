@@ -16,6 +16,7 @@ CREATE TABLE accounts (
     account_number  VARCHAR(20)     NOT NULL,
     account_type    VARCHAR(20)     NOT NULL DEFAULT 'SAVINGS',
     balance         NUMERIC(15, 2)  NOT NULL DEFAULT 0.00,
+    is_frozen       BOOLEAN         NOT NULL DEFAULT FALSE,
     created_at      TIMESTAMP       NOT NULL DEFAULT NOW(),
     updated_at      TIMESTAMP       NOT NULL DEFAULT NOW()
 );
