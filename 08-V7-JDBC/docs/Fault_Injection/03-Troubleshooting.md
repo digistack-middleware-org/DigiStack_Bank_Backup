@@ -1,85 +1,132 @@
-# Simple Lesson: The Node Agent Fault (INC-v6-001)
+# 🔍 INC-v7-001 — Root Cause Analysis & Remediation
 
-## 1. What Happened?
-
-- process stopped: the **Node Agent** on node02.
-- That one stop caused **all six symptoms**.
-- Nothing else broke.
-
-> **Real-life example:** Think of a shop manager (DMgr) who can only talk
-> to the shop (node02) through a phone line (Node Agent). The phone line
-> is dead. The is still open and selling, but the manager cannot
-> call it.
+> **One misconfigured field in one WAS configuration object explains
+> every single symptom in the ticket.** The database is healthy, the
+> application is deployed, the cluster is intact — none of that matters
+> because WAS cannot authenticate to PostgreSQL.
 
 ---
 
-## 2. What is a Node Agent?
+## 🎯 Root Cause
 
-It does three jobs:
-
-- **Receives config updates** from DMgr and saves them on the node.
-- **Forwards admin commands** (start/stop server, deploy apps) to the node.
-- **Reports health status** back so the console shows the node as alive.
-
-**It is the only bridge** between DMgr and the node.
-No bridge = no remote control.
+**The JAAS Auth Alias `BankDS_Alias` contains the wrong password.**
 
 ---
 
-## 3. Why Each Symptom Happened
+## 🔗 Why One Wrong Password Causes All Seven Symptoms
 
-| Symptom | Simple Reason |
+### The Causal Chain
+
+When your application calls:
+
+```java
+InitialContext.lookup("jdbc/BankDS")
+ds.getConnection()
+```
+
+WAS does **not** pass credentials from your Java code — it reads them
+from `BankDS_Alias` and uses them to authenticate to PostgreSQL when
+opening a pooled connection. If those credentials are wrong, WAS cannot
+open **any** connection at all. Every single feature that touches the
+database fails immediately.
+
+### Symptom-by-Symptom Explanation
+
+| # | Symptom | Why the wrong alias password causes it |
+|---|---------|----------------------------------------|
+| 1 | Home page — DB Error, Status Unavailable | `HomeServlet.doGet()` calls `getConnection()` → JNDI lookup returns DataSource → `ds.getConnection()` attempts to borrow a pool connection → WAS tries to authenticate to PostgreSQL with `WrongPassword@999` → PostgreSQL rejects with `FATAL: password authentication failed` → `SQLException` caught → `dbConnStatus` stays "Error", default values used |
+| 2 | Login — "A system error occurred" | `LoginServlet.doPost()` calls `getConnection()` → same authentication failure → `SQLException` caught in the outer try-catch → generic error message forwarded to `Login.jsp` → user cannot log in |
+| 3 | Application shows Started in Admin Console | The application server JVM started cleanly — the EAR deployed fine, servlets initialized fine. WAS only attempts to authenticate to PostgreSQL when a connection is **actually requested**, not at startup. The green icon reflects JVM health, **not** DataSource health |
+| 4 | Test Connection returns password authentication failed | Direct proof. WAS's Test Connection button attempts exactly what the application does — authenticate with `BankDS_Alias` credentials. PostgreSQL correctly rejects `WrongPassword@999` and returns SQLSTATE `28000` (invalid authorization specification) |
+| 5 | PostgreSQL is healthy and accepts correct credentials | Correct — the database is not the problem. It is behaving exactly as it should: accepting correct credentials, rejecting wrong ones. The problem is entirely in WAS's credential store |
+| 6 | Node Agents synchronized, topology intact | Node Sync has nothing to do with DataSource credential validity. The alias configuration was synchronized to both nodes correctly — **both nodes now have the wrong password synchronized to them** |
+| 7 | `StaleConnectionException` in SystemOut.log | When WAS starts the application servers, it tries to establish the minimum pool connections (min=5 per member). Each attempt fails with an authentication error. WAS logs these as `StaleConnectionException` — a misleading label, but it is the WAS pool manager's way of saying "I tried to open this connection and it failed" |
+
+### ⚠️ The Most Deceptive Aspect of This Fault
+
+**Symptom 3 is the trap.**
+
+- The Admin Console shows **green** — the application is "Started."
+- A junior administrator looking at that screen concludes:
+  *"WAS is fine, the problem must be in the database or the network."*
+- But the database **IS fine** (Symptom 5).
+
+This contradiction — **green application, broken database connectivity,
+healthy database** — points precisely at the authentication layer
+between them: **the JAAS Auth Alias.**
+
+---
+
+## 📖 What "Credential Management Tasks" Means in the Incident Ticket
+
+This is the real-world scenario:
+
+1. A DBA rotated the `digistack_app` PostgreSQL password as part of a
+   **security compliance exercise**.
+2. They updated the password in PostgreSQL directly.
+3. They **did not tell the WAS administrator**.
+4. The WAS administrator did **not** update `BankDS_Alias`.
+5. The next application server restart loaded the stale credentials
+   from the alias into the pool — and the pool could not authenticate.
+
+> 💡 This is one of the **most common DataSource failures** in
+> enterprise WAS environments. The fix is not technical complexity —
+> it is **one field in one form**. But finding that field requires
+> understanding the credential flow, which is exactly what v7 was
+> designed to teach.
+
+---
+
+## 🕵️ Investigation Steps (What You Would Do If You Didn't Know)
+
+### Step 1 — Read the exact SQL State from the Test Connection error
+
+```
+DSRA0010E: SQL State = 28000
+```
+
+SQLSTATE `28000` is the PostgreSQL code for **invalid authorization
+specification** — wrong username or password.
+
+This immediately tells you the problem is:
+
+| SQL State / Error | Meaning |
 |---|---|
-| Node shows grey "Unavailable" | DMgr pings the Node Agent. No answer = grey. |
-| Sync fails | Sync pushes files through the Node Agent. No agent = push fails. |
-| JVM change missing on node02 | DMgr saved it, but delivery needs the Node Agent. Never delivered |
-| App still works | App server is a separate process, already running. It doesn't need the Node Agent to serve traffic. |
-| Restart from console fails | Restart command must travel through the Node Agent. No path = error. |
-| wsadmin throws exception | wsadmin talks to live MBeans via the Node Agent. No agent = no connection. |
+| `28000` ✅ | **Authentication** — wrong username/password (our case) |
+| `08001` | Connectivity — cannot reach the database |
+| `3D000` | Missing database |
+| `ClassNotFoundException` | Driver problem (not a SQL State at all) |
+
+### Step 2 — Confirm PostgreSQL is reachable and the account exists
+
+```bash
+psql -h 192.168.10.30 -U digistack_app -d digistack_bank
+```
+
+Enter the known-correct password.
+
+- ✅ If this succeeds — PostgreSQL is healthy and the user exists.
+- The problem is not in PostgreSQL.
+- The problem is in **what WAS is sending as the password**.
+
+### Step 3 — Identify what WAS is sending
+
+WAS sends the credentials from `BankDS_Alias`.
+
+- There is no way to see the decrypted password from `security.xml`
+  directly — WAS encrypts it.
+- But you do **not** need to see it.
+- The Test Connection result **proves** the wrong password is being sent.
+- The alias is the **only place** WAS reads DataSource credentials from.
+
+### Step 4 — Check the alias
+
+```
+Admin Console → Security → Global security
+→ J2C authentication data → BankDS_Alias → open it
+```
+
+- You cannot see the stored password (it is masked).
+- But you **can re-enter** the correct one.
 
 ---
-
-## 4. Why This Fault is Dangerous
-
-- **Users see nothing wrong.** The app keeps working.
-- **Basic monitoring sees nothing wrong.** HTTP checks return 200.
-- But the node is **administratively dark**:
-  - Can't push config.
-  - Can't restart the server remotely.
-  - If the app crashes, you **cannot bring it back from the console**.
-
-> **Real-life example:** The shop is open, but the manager can't call it.
-> If the shop suddenly closes, no one can tell the staff to reopen.
-
----
-
-## 5. How to Investigate (If You Didn Know the Answer)
-
-### Step 1 — Is the Node Agent running?
-```bash
-ps -ef | grepagent
-```
-- No process found = root cause found. (10 seconds!)
-
-### Step 2 — Why did it stop?
-```bash
-tail -100 /apps/IBM/WebSphere/AppServer/profiles/<node02-profile>/logs/nodeagent/SystemOut.log
-```
-- `ADMU3201I stopping` = clean manual stop.
-- `ADMU0111E` or OOM errors = crash, different problem.
-
-### Step 3 — Is the app server still alive?
-```bash
-ps -ef | grep server1
-```
-- Yes = proves app server and Node Agent are separate.
-
-### Step 4 — Is traffic still flowing?
-```bash
-curl -o /dev/null -s -w "%{http_code}" http://192.168.10.20/digistack-bank/Home
-```
-- 200 = users unaffected.
-
----
-
-

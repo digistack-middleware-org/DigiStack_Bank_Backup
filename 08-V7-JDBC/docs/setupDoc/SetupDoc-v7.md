@@ -1,17 +1,20 @@
 # SetupDoc-v7.md — DigiStack Bank P01 v7
 
-**Version:** P01 v7 — JNDI DataSource Migration  
-**Date:** `<completion date>`  
-**Author:** `<your name>`  
-**Status:** SIGNED OFF
+Version:  P01 v7 — JNDI DataSource Migration
+Date:     <completion date>
+Author:   <your name>
+Status:   SIGNED OFF
 
 ---
 
 ## Purpose
 
-This document captures the complete setup, configuration, and verification steps performed for DigiStack Bank P01 v7.
-
-Following this document start-toinish on a clean environment must reproduce a working v7 deployment — including the WAS JDBC Provider, JAAS Auth Alias, DataSource, connection pool, and pool validation configuration.
+This document captures the complete setup, configuration, and
+verification steps performed for DigiStack Bank P01 v7.
+Following this document start-to-finish on a clean environment
+must reproduce a working v7 deployment — including the WAS
+JDBC Provider, JAAS Auth Alias, DataSource, connection pool,
+and pool validation configuration.
 
 ---
 
@@ -39,23 +42,24 @@ Following this document start-toinish on a clean environment must reproduce a wo
 
 | Item | Value |
 |------|-------|
-| Cell name | devdsbincell01 *(confirm from your env)* |
+| Cell name | devdsbincell01 (confirm from your env) |
 | DMgr profile | devdsbindmgr01 |
-| WAS install path | `/apps/IBM/WebSphere/AppServer/` |
-| DMgr profile path | `/apps/IBM/WebSphere/AppServer/profiles/devdsbindmgr01/` |
-| Cluster name | *(confirm from your env)* |
+| WAS install path | /apps/IBM/WebSphere/AppServer/ |
+| DMgr profile path | /apps/IBM/WebSphere/AppServer/profiles/devdsbindmgr01/ |
+| Cluster name | confirm from your env |
 
 ---
 
 ## Pre-requisites
 
-- [ ] P01 v6 signed off and deployed (`digistack-bank-v6.ear` running)
-- [ ] All VMs powered on and reachable
-- [ ] PostgreSQL JDBC driver JAR present at **IDENTICAL path on BOTH nodes**: `/apps/IBM/WebSphereServer/lib/ext/jdbc/postgresql-42.7.3.jar`
-- [ ] WAS Admin Console reachable at `https://192.168.10.10:9043/ibm/console`
-- [ ] PostgreSQL `digistack_bank` database running on dsb-db (192.168.10.30)
-- [ ] PostgreSQL user: `digistack_app` / `Wasadmin@951951`
-- [ ] Java and Maven installed on development laptop (Windows)
+- P01 v6 signed off and deployed (digistack-bank-v6.ear running)
+- All VMs powered on and reachable
+- PostgreSQL JDBC driver JAR present at IDENTICAL path on BOTH nodes:
+  /apps/IBM/WebSphere/AppServer/lib/ext/jdbc/postgresql-42.7.3.jar
+- WAS Admin Console reachable at https://192.168.10.10:9043/ibm/console
+- PostgreSQL digistack_bank database running on dsb-db (192.168.10.30)
+- PostgreSQL user: digistack_app / Wasadmin@951951
+- Java and Maven installed on development laptop (Windows)
 
 ---
 
@@ -70,29 +74,33 @@ find /apps/IBM/WebSphere/AppServer -name "postgresql*.jar" 2>/dev/null
 # On dsb-node02
 find /apps/IBM/WebSphere/AppServer -name "postgresql*.jar" 2>/dev/null
 ```
-
-**Expected:** `/apps/IBM/WebSphere/AppServer/lib/ext/jdbc/postgresql-42.7.3.jar` on both nodes. If missing on node02 — `scp` from dsb-dmgr.
+Expected: `/apps/IBM/WebSphere/AppServer/lib/ext/jdbc/postgresql-42.7.3.jar`
+on both nodes. If missing on node02 — scp from dsb-dmgr.
 
 ### Admin Console steps
 
-1. **Resources → JDBC → JDBC Providers**
-2. Scope: `Cell=devdsbincell01`
-3. **New** → Database type: `User-defined`
-4. Implementation class name: `org.postgresql.ds.PGConnectionPoolDataSource`
+1. Resources → JDBC → JDBC Providers
+2. Scope: Cell=devdsbincell01
+3. New → Database type: User-defined
+4. Implementation class name:
+   `org.postgresql.ds.PGConnectionPoolDataSource`
 5. Name: `PostgreSQL JDBC Provider`
-6. Description: `PostgreSQL 16 JDBC Provider for DigiStack Bank. Driver: postgresql-42.7.3.jar. Added at P01 v7.`
-7. Classpath: `/apps/IBM/WebSphere/AppServer/lib/ext/jdbc/postgresql-42.7.3.jar`
-8. **Finish → Save**
+6. Description:
+   `PostgreSQL 16 JDBC Provider for DigiStack Bank.
+   Driver: postgresql-42.7.3.jar. Added at P01 v7.`
+7. Classpath:
+   `/apps/IBM/WebSphere/AppServer/lib/ext/jdbc/postgresql-42.7.3.jar`
+8. Finish → Save
 
 ### wsadmin equivalent
 
 ```jython
 cellId = AdminConfig.getid('/Cell:devdsbincell01/')
 jdbcAttrs = [
-    ['name',                    'PostgreSQL JDBC Provider'],
-    ['description',             'PostgreSQL 16 JDBC Provider for DigiStack Bank. Driver: postgresql-42.7.3.jar. Added at P01 v7.'],
+    ['name',                   'PostgreSQL JDBC Provider'],
+    ['description',            'PostgreSQL 16 JDBC Provider for DigiStack Bank. Driver: postgresql-42.7.3.jar. Added at P01 v7.'],
     ['implementationClassName', 'org.postgresql.ds.PGConnectionPoolDataSource'],
-    ['classpath',               '/apps/IBM/WebSphere/AppServer/lib/ext/jdbc/postgresql-42.7.3.jar']
+    ['classpath',              '/apps/IBM/WebSphere/AppServer/lib/ext/jdbc/postgresql-42.7.3.jar']
 ]
 AdminConfig.create('JDBCProvider', cellId, jdbcAttrs)
 AdminConfig.save()
@@ -104,8 +112,7 @@ AdminConfig.save()
 grep -i "ClassNotFoundException" \
   /apps/IBM/WebSphere/AppServer/profiles/devdsbindmgr01/logs/nodeagent/SystemOut.log
 ```
-
-**Expected:** no output.
+Expected: no output.
 
 ---
 
@@ -114,16 +121,17 @@ grep -i "ClassNotFoundException" \
 ### Create JAAS Auth Alias
 
 **Admin Console:**
-
-1. **Security → Global security → Java Authentication and Authorization Service → J2C authentication data → New**
+1. Security → Global security → Java Authentication and Authorization
+   Service → J2C authentication data → New
 2. Alias: `BankDS_Alias`
 3. User ID: `digistack_app`
 4. Password: `Wasadmin@951951`
-5. Description: `PostgreSQL digistack_bank credentials for jdbc/BankDS. Added at P01 v7.`
-6. **OK → Save**
+5. Description:
+   `PostgreSQL digistack_bank credentials for jdbc/BankDS.
+   Added at P01 v7.`
+6. OK → Save
 
 **wsadmin:**
-
 ```jython
 AdminTask.createAuthDataEntry(
     '[-alias BankDS_Alias '
@@ -136,27 +144,26 @@ AdminConfig.save()
 ### Create DataSource
 
 **Admin Console:**
-
-1. **Resources → JDBC → Data sources**
-2. Scope: `Cell=devdsbincell01`
-3. **New**
+1. Resources → JDBC → Data sources
+2. Scope: Cell=devdsbincell01
+3. New
 4. Data source name: `DigiStack Bank DataSource`
 5. JNDI name: `jdbc/BankDS`
 6. Select existing JDBC provider: `PostgreSQL JDBC Provider`
 7. URL: `jdbc:postgresql://192.168.10.30:5432/digistack_bank`
 8. Data store helper: `com.ibm.websphere.rsadapter.GenericDataStoreHelper`
-9. Component-managed auth alias: `BankDS_Alias10. Container-managed auth alias: `BankDS_Alias`
-11. **Finish → Save**
+9. Component-managed auth alias: `BankDS_Alias`
+10. Container-managed auth alias: `BankDS_Alias`
+11. Finish → Save
 
 **wsadmin:**
-
 ```jython
 jdbcProvider = AdminConfig.getid(
     '/Cell:devdsbincell01/JDBCProvider:PostgreSQL JDBC Provider/')
 dsAttrs = [
-    ['name',               'DigiStack Bank DataSource'],
-    ['jndiName',           'jdbc/BankDS'],
-    ['authDataAlias',      'BankDS_Alias'],
+    ['name',              'DigiStack Bank DataSource'],
+    ['jndiName',          'jdbc/BankDS'],
+    ['authDataAlias',     'BankDS_Alias'],
     ['xaRecoveryAuthAlias','BankDS_Alias']
 ]
 ds = AdminConfig.create('DataSource', jdbcProvider, dsAttrs)
@@ -167,23 +174,23 @@ AdminConfig.create('J2EEResourceProperty', propSet,
      ['type','java.lang.String']])
 AdminConfig.create('J2EEResourceProperty', propSet,
     [['name','dataStoreHelperClassName'],
-     ['value','com.ibm.websphere.rsadapter.GenericDataHelper'],
+     ['value','com.ibm.websphere.rsadapter.GenericDataStoreHelper'],
      ['type','java.lang.String']])
 AdminConfig.save()
 ```
 
 ### Test Connection
 
-Admin Console → **Data sources** → select *DigiStack Bank DataSource* → **Test connection**
+Admin Console → Data sources → select DigiStack Bank DataSource
+→ Test connection
 
-**Expected:**
+Expected:
 
-```
 The test connection operation for data source DigiStack Bank DataSource
-on node devdsbinnode01 was successful.
+on server server1 at node devdsbinnode01 was successful.
 The test connection operation for data source DigiStack Bank DataSource
-on node devdsbinnode02 was successful.
-```
+on server server1 at node devdsbinnode02 was successful.
+
 
 ### Verify no plaintext credentials
 
@@ -191,8 +198,7 @@ on node devdsbinnode02 was successful.
 grep -r "Wasadmin\|digistack_app" \
   /apps/IBM/WebSphere/AppServer/profiles/devdsbindmgr01/config/cells/devdsbincell01/resources.xml
 ```
-
-**Expected:** no output.
+Expected: no output.
 
 ---
 
@@ -200,19 +206,16 @@ grep -r "Wasadmin\|digistack_app" \
 
 ### Pool sizing math (CAP01 §4 lab-adjusted)
 
-```
 2 cluster members × 20 max connections per member = 40 peak connections
-PostgreSQL max_connections                        = 100
-Headroom                                          = 60 connections
-                                                   (DBA tools, monitoring, admin sessions)
-dsb-db: 2 vCPU / 2 GB RAM / PostgreSQL 16 dedicated
-→ max_connections=100 safe
-```
+PostgreSQL max_connections = 100
+Headroom = 60 connections (DBA tools, monitoring, admin sessions)
+dsb-db: 2 vCPU / 2 GB RAM / PostgreSQL 16 dedicated — max_connections=100 safe
+
 
 ### Admin Console steps
 
-1. **Resources → JDBC → Data sources → DigiStack Bank DataSource**
-2. **Connection pool properties:**
+1. Resources → JDBC → Data sources → DigiStack Bank DataSource
+2. Connection pool properties:
 
 | Property | Value |
 |----------|-------|
@@ -224,9 +227,9 @@ dsb-db: 2 vCPU / 2 GB RAM / PostgreSQL 16 dedicated
 | Reap time | 180 |
 | Purge policy | EntirePool |
 | Pre-test connections | Enabled |
-| Validation query | `SELECT 1` |
+| Validation query | SELECT 1 |
 
-3. **OK → Save**
+3. OK → Save
 
 ### wsadmin equivalent
 
@@ -234,19 +237,19 @@ dsb-db: 2 vCPU / 2 GB RAM / PostgreSQL 16 dedicated
 ds = AdminConfig.getid(
     '/Cell:devdsbincell01/JDBCProvider:PostgreSQL JDBC Provider/'
     'DataSource:DigiStack Bank DataSource/')
-pool = AdminConfig.list('ConnectionPool',)
+pool = AdminConfig.list('ConnectionPool', ds)
 AdminConfig.modify(pool, [
-    ['minConnections',              5],
-    ['maxConnections',              20],
-    ['connectionTimeout',           180],
-    ['unusedTimeout',               1800],
-    ['agedTimeout',                 7200],
-    ['reapTime',                    180],
-    ['purgePolicy',                 'EntirePool'],
-    ['validateNewConnection',       'true'],
-    ['preTestConnections',          'true'],
-    ['connectionValidationMethod',  'SQL_QUERY'],
-    ['validationQuery',             'SELECT 1']
+    ['minConnections',    5],
+    ['maxConnections',    20],
+    ['connectionTimeout', 180],
+    ['unusedTimeout',     1800],
+    ['agedTimeout',       7200],
+    ['reapTime',          180],
+    ['purgePolicy',       'EntirePool'],
+    ['validateNewConnection', 'true'],
+    ['preTestConnections', 'true'],
+    ['connectionValidationMethod', 'SQL_QUERY'],
+    ['validationQuery',   'SELECT 1']
 ])
 AdminConfig.save()
 ```
@@ -269,14 +272,13 @@ SELECT pg_terminate_backend(<pid>);
 SELECT pid, client_addr FROM pg_stat_activity
 WHERE usename = 'digistack_app';
 ```
-
-**Expected:** killed PID gone, new PIDs present, app request succeeded.
+Expected: killed PID gone, new PIDs present, app request succeeded.
 
 ### Restart application servers
 
 Pool changes require app server restart to take effect.
-
-Admin Console → **Servers → WebSphere application servers** → select both → **Stop → Start**
+Admin Console → Servers → WebSphere application servers
+→ select both → Stop → Start.
 
 ---
 
@@ -284,32 +286,37 @@ Admin Console → **Servers → WebSphere application servers** → select both 
 
 ### What changed
 
-All seven classes migrated from `DriverManager.getConnection()` to JNDI lookup of `jdbc/BankDS:
+All seven classes migrated from `DriverManager.getConnection()` to
+JNDI lookup of `jdbc/BankDS`:
 
 | Class | v1–v6 | v7 |
 |-------|-------|-----|
-| AccountService | DriverManager | `InitialContext.lookup("jdbc/BankDS")` |
-| DepositService | DriverManager | `InitialContext.lookup("jdbc/BankDS")` |
-| WithdrawService | DriverManager | `InitialContext.lookup("jdbc/BankDS")` |
-| FreezeService | DriverManager | `InitialContext.lookup("jdbc/BankDS")` |
-| HomeServlet | DriverManager | `InitialContext.lookup("jdbc/BankDS")` |
-| LoginServlet | DriverManager | `InitialContext.lookup("jdbc/BankDS")` |
-| DashboardServlet | `init()` removed | No driver registration needed |
+| AccountService | DriverManager | InitialContext.lookup("jdbc/BankDS") |
+| DepositService | DriverManager | InitialContext.lookup("jdbc/BankDS") |
+| WithdrawService | DriverManager | InitialContext.lookup("jdbc/BankDS") |
+| FreezeService | DriverManager | InitialContext.lookup("jdbc/BankDS") |
+| HomeServlet | DriverManager | InitialContext.lookup("jdbc/BankDS") |
+| LoginServlet | DriverManager | InitialContext.lookup("jdbc/BankDS") |
+| DashboardServlet | init() removed | No driver registration needed |
 
 ### Grep verification (mandatory)
 
-Run from project root — **all must return no output except `SeedUsers.java`:**
+Run from project root — all must return no output except SeedUsers.java:
 
 ```bash
-grep -r "DriverManager"    digistack-bank-web/src/main/java/
-grep -r "192.168.10.30"    digistack-bank-web/src/main/java/
-grep -r "Wasadmin@951951"  digistack-bank-web/src/main/java/
-grep -r "jdbc:postgresql"  digistack-bank-web/src/main/java/
+grep -r "DriverManager" digistack-bank-web/src/main/java/
+grep -r "192.168.10.30"  digistack-bank-web/src/main/java/
+grep -r "Wasadmin@951951" digistack-bank-web/src/main/java/
+grep -r "jdbc:postgresql" digistack-bank-web/src/main/java/
 ```
 
 ### SeedUsers.java exception (intentional)
 
-`SeedUsers.java` retains direct JDBC — it is a **standalone utility run on the dev laptop WAS**. JNDI is not available outside a WAS JVM context. Credentials moved to gitignored `config/db-local.properties`. No hardcoded credentials remain in any WAS-deployed class.
+SeedUsers.java retains direct JDBC — it is a standalone utility
+run on the dev laptop outside WAS. JNDI is not available outside
+a WAS JVM context. Credentials moved to gitignored
+`config/db-local.properties`. No hardcoded credentials remain
+in any WAS-deployed class.
 
 ---
 
@@ -326,17 +333,16 @@ grep -r "jdbc:postgresql"  digistack-bank-web/src/main/java/
 cd digistack-bank
 mvn clean package
 ```
-
-**Expected:** `digistack-bank-ear/target/digistack-bank-v7.ear` produced.
+Expected: `digistack-bank-ear/target/digistack-bank-v7.ear` produced.
 
 ### Deploy — Admin Console
 
-1. **Applications → WebSphere enterprise applications**
-2. **Stop** DigiStack Bank v6
-3. Select → **Update → Replace entire application**
-4. Browse to `digistack-bank-v7.ear` → Next through wizard
-5. Map to cluster → **Finish → Save**
-6. **Start** DigiStack Bank v7
+1. Applications → WebSphere enterprise applications
+2. Stop DigiStack Bank v6
+3. Select → Update → Replace entire application
+4. Browse to digistack-bank-v7.ear → Next through wizard
+5. Map to cluster → Finish → Save
+6. Start DigiStack Bank v7
 
 ### Deploy — wsadmin
 
@@ -354,17 +360,23 @@ AdminConfig.save()
 
 | URL | Expected |
 |-----|----------|
-| `http://192.168.10.10:9080/digistack-bank/Home` | v7 footer, DB Connected |
-| `http://192.168.10.11:9080/digistack-bank/Home` | identical to member 1 |
-| `http://192.168.10.20/digistack-bank/Home` | loads via IHS |
+| http://192.168.10.10:9080/digistack-bank/Home | v7 footer, DB Connected |
+| http://192.168.10.11:9080/digistack-bank/Home | identical to member 1 |
+| http://192.168.10.20/digistack-bank/Home | loads via IHS |
 
 ### Transaction boundary traceability note
 
 **Current state (v7):**
-All operations are single-statement local transactions with `autoCommit=true`. PostgreSQL provides implicit atomicity. No explicit `conn.commit()` or `conn.rollback()` in application code. This is correct and complete for all current operations (each touches one row in one table on one DataSource).
+All operations are single-statement local transactions with
+`autoCommit=true`. PostgreSQL provides implicit atomicity.
+No explicit `conn.commit()` or `conn.rollback()` in application code.
+This is correct and complete for all current operations
+(each touches one row in one table on one DataSource).
 
 **Rollback proof (Sprint 5):**
-Over-limit Withdraw submitted → `InsufficientFundsException` thrown before SQL UPDATE → balance unchanged (confirmed by SELECT before and after).
+Over-limit Withdraw submitted → `InsufficientFundsException` thrown
+before SQL UPDATE → balance unchanged (confirmed by SELECT before
+and after).
 
 **Future transaction boundary design points:**
 
@@ -378,7 +390,6 @@ Over-limit Withdraw submitted → `InsufficientFundsException` thrown before SQL
 ## Part 6 — Sprint 6: Test Cases and Unit Tests
 
 ### Manual test cases
-
 - File: `docs/testing/TestCases-v7.md`
 - 47 test cases across 7 sections
 - 31 Critical + 14 High cases all passed before sign-off
@@ -388,15 +399,14 @@ Over-limit Withdraw submitted → `InsufficientFundsException` thrown before SQL
 ```bash
 mvn test
 ```
+Expected:
 
-**Expected:**
-
-```
 Tests run: 25, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS
-```
 
-No new Service classes introduced in v7. Existing test subclasses override `getConnection()` — JNDI path never reached in tests. All 25 tests pass unchanged.
+No new Service classes introduced in v7.
+Existing test subclasses override `getConnection()` — JNDI
+path never reached in tests. All 25 tests pass unchanged.
 
 ---
 
@@ -411,29 +421,11 @@ cd /apps/IBM/WebSphere/AppServer/profiles/devdsbindmgr01/bin
   -nostop
 ```
 
-**Expected:**
-
-```
-ADMU7701I: backupConfig is beginning...
-ADMU7702I: Backing up configuration for cell: devdsbincell01
-ADMU0505I: Backup file created successfully:
-           .../config-backups/digistack-bank-v7-signoff.zip
-```
-
 ### Backup file
 
-```
 /apps/IBM/WebSphere/AppServer/profiles/devdsbindmgr01/
 config-backups/digistack-bank-v7-signoff.zip
-```
 
-Verify:
-
-```bash
-ls -lh /apps/IBM/WebSphere/AppServer/profiles/devdsbindmgr01/config-backups/
-```
-
-**Expected:** Both `digistack-bank-v6-signoff.zip` and `digistack-bank-v7-signoff.zip` present, non-zero size.
 
 ### Restore command (reference only — do not run unless restoring)
 
@@ -441,20 +433,6 @@ ls -lh /apps/IBM/WebSphere/AppServer/profiles/devdsbindmgr01/config-backups/
 ./restoreConfig.sh \
   /apps/IBM/WebSphere/AppServer/profiles/devdsbindmgr01/config-backups/digistack-bank-v7-signoff.zip
 ```
-
----
-
-## Sprint 7 — Final Smoke Test Results
-
-All five checks must pass in order:
-
-| # | Test | Result |
-|---|------|--------|
-| 1 | Home page loads via IHS, DB Connected shown | ☐ Pass / ☐ Fail |
-| 2 | Login `customer1` / `Customer@123` → Dashboard | ☐ Pass / ☐ Fail |
-| 3 | Deposit ₹500 → balance +₹500 | ☐ Pass / ☐ Fail |
-| 4 | Withdraw ₹100 → balance −₹100 | ☐ Pass / ☐ Fail |
-| 5 | Over-limit Withdraw → "Insufficient funds", balance unchanged | ☐ Pass / ☐ Fail |
 
 ---
 
@@ -480,7 +458,7 @@ All five checks must pass in order:
 - [ ] Smoke Test 5 passed: Over-limit Withdraw rejected, balance unchanged
 - [ ] SetupDoc-v7.md complete and accurate
 - [ ] TestCases-v7.md: all 31 Critical + 14 High cases marked Pass
-- [ ] `mvn test`: BUILD SUCCESS, 0 failures (TEST01 gating satisfied)
+- [ ] mvn test: BUILD SUCCESS, 0 failures (TEST01 gating satisfied)
 - [ ] Footer updated to v7 across all JSPs
 - [ ] Transaction-boundary traceability note in SetupDoc-v7.md
 

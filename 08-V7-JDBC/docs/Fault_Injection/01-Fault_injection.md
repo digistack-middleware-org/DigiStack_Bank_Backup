@@ -1,103 +1,127 @@
-# Ox Alpha — Sprint 8: Node Synchronization & Federation (Simple English Lesson)
+# 🎓 Phase 1 — Fault Injection: JAAS Auth Alias Password Mismatch
+
+> Simulates a real-world failure: a database password rotation applied in
+> PostgreSQL but NOT updated in the WAS JAAS Auth Alias.
 
 ---
 
-## 1. What is WAS ND Cell?
+## 1. What is a JAAS Auth Alias?
 
-- **ND** = Network Deployment.
-- A **cell** is a group of servers managed from one place.
-- The boss is the **Deployment Manager (DMgr)** — usually on `dsb-dmgr`.
-- The workers are **managed nodes** — like `dsb-node02`.
+- It is a **saved username + password** inside WebSphere (WAS).
+- WAS uses it to **log in to the database** for you.
+- Think of it like a **saved contact card** WAS shows to PostgreSQL.
+- Your app never sees the password. WAS handles it.
 
 **Real-life example:**
-Think of a company. Head office (DMgr) sends policies. Branch offices (nodes) follow them.
+Like a receptionist (WAS) holding a key card (alias) to open the server
+room (database) for guests (your app).
 
 ---
 
-## 2. What is Federation?
+## 2. What is a JNDI DataSource?
 
-- **Federation** = joining a node to a cell.
-- You run `addNode` on the node.
-- The node registers with the DMgr.
-- After that, the DMgr controls the node.
+- It is a **named connection factory** in WAS.
+- Your app says: *"Give me `DigiStack Bank DataSource`"* — no DB details needed.
+- Behind the scenes, WAS uses the **JAAS alias** to authenticate.
 
-What happens during federation:
-- A copy of the cell config comes to the node.
-- The node gets a **node agent**.
-- The DMgr now "owns" the node.
+**Chain to remember:**
 
-**Real-life example:**
-A franchise store joining a big brand. It now follows head office rules.
+    App → JNDI DataSource → JAAS Alias → PostgreSQL
+
+If the alias is wrong, the whole chain breaks.
 
 ---
 
-## 3. What is a Node Agent?
+## 3. Why Do We Inject This Fault?
 
-- One **nodeagent** runs per node.
-- It is the **middleman** between DMgr and the app servers on that node.
-- Jobs:
-  - Pass config changes from DMgr to app servers.
-  - Start/stop app servers when DMgr asks.
-  - Run periodic **node sync**.
-  - Report node health to DMgr.
+- DBAs **rotate passwords regularly** (security rule).
+- Very common real mistake: DBA changes the password in PostgreSQL but
+  **forgets to tell the WAS admin**.
+- Result: the app **suddenly fails**, everyone panics, nobody knows why.
 
-**Real-life example:**
-The branch manager. Head office emails him. He tells the staff. If he quits, staff keep working — but nobody gets new instructions.
+**This exercise teaches you to recognize and fix that.**
 
 ---
 
-## 4. What is Node Synchronization?
+## 4. Step-by-Step: Injecting the Fault
 
-- The DMgr keeps the **master config** (master repository).
-- Each node keeps a **local copy**.
-- **Sync** = copying changes from master to the node's local copy.
+### Step A — Change the alias password
 
-Three ways sync happens:
-- **Automatic** — node agent pulls every few minutes (default config).
-- **Manual** — Console → System administration → Nodes → Synchronize.
-- **Command** — `syncNode.sh` (run when node agent is down).
+- Open console: `https://192.168.10.10:9043/ibm/console`
+- Left menu → **Security → Global security**
+- Scroll to **Authentication** → click **Java Authentication and Authorization Service**
+- Click **J2C authentication data**
+- Click **BankDS_Alias**
+- Change Password: `Wasadmin@951951` → `WrongPassword@999`
+- User ID stays: `digistack_app` ✅ (unchanged)
+- Click **OK → Save**
 
-Direction matters:
-- Sync flows **DMgr → node** (config).
-- Logs/files flow **node → DMgr** (for viewing in console).
+### Step B — Force nodes to pick up the change
 
----
+- **System administration → Nodes**
+- Select **all nodes** → **Full Resynchronize**
+- ✅ Expect: *"Synchronization completed successfully."*
 
-## 5. What Happens When a Node Agent is Down?
+> ⚠️ **Note:** Resync succeeded — that only proves config **files** copied
+> fine. It does **NOT** prove the password works.
 
-This is the key lesson of this sprint:
+### Step C — Restart app servers
 
-- App servers on the node **keep running**. ✅
-- Applicationskeep serving users**. ✅
-- BUT:
-  - New config changes **do not reach** the node. ❌
-  - DMgr **cannot start/stop** app servers on it. ❌
-  - Console shows the node as **not synchronized**. ❌
+- **Servers → Server Types → WebSphere application servers**
+- Select both → **Stop** → wait for stopped
+- Select both → **Start** → wait for green ✅
 
-**The trap:** Everything *looks* fine from the user side. Nobody notices until a change is needed — or a restart fails.
+**Why restart?**
+The connection pool **caches old credentials**. A restart forces WAS to
+load the new (wrong) alias.
 
-**Real-life example:**
-The branch manager is on leave. Staff keep selling. But no new price list arrives. Orders sent to head office go unanswered.
+### Step D — Confirm the fault
 
----
+- **Resources → JDBC → Data sources**
+- Check **DigiStack Bank DataSource** → **Test connection**
+- ❌ You will see a failure, something like:
 
-## 6. Signs of a Down Node Agent (Your Diagnosis Clues)
+    The test connection operation failed.
+    DSRA4000E: Failed to connect to the datasource.
+    User ID or password is invalid. (DSRA4004E / SQLSTATE 28P01)
 
-In Phase 2, watch for these:
-
-- Console: node shows **"not synchronized"** or **unknown status**.
-- Click **Synchronize** → error like:
-  - "Could not connect to node agent"
-  - ADMU or sync exception mentioning the node.
-- `serverStatus.sh -all` on the node: nodeagent missing.
-- DMgr `SystemOut.log`: failed connection to node agent port (default **9101** — ORB bootstrap).
-- Deployments or restarts on that node fail, but users see nothing wrong.
+> 🚫 **Do NOT fix it yet.** Just note the exact error message.
 
 ---
 
-## 7. How to Fix It (For After Your Diagnosis)
+## 5. What Just Happened? (The Logic)
 
-```bash
-cd /apps/IBM/WebSphere/AppServer/profiles/<node02-profile>/bin
-./startNode.sh
-```
+| Piece           | Status                              |
+|-----------------|-------------------------------------|
+| PostgreSQL      | ✅ Healthy, new password active     |
+| WAS alias       | ❌ Old/wrong password               |
+| App servers     | ✅ Running fine                     |
+| Test connection | ❌ Fails                            |
+
+**Key insight:**
+The app server can be **up** while the database connection is **broken**.
+Healthy processes ≠ healthy connectivity.
+
+---
+
+## 6. Real-World Impact
+
+If this were production:
+
+- 💳 Customers can't log in to banking app
+- 📉 Transactions fail with `500` errors
+- 🔥 App logs fill with `Connection refused / authentication failed`
+- 😰 On-call team gets paged at 2 AM
+
+---
+
+## 7. Quick Memory Cheat Sheet
+
+- **Alias** = saved DB credentials in WAS
+- **JNDI** = friendly name app uses to reach the DB
+- **Password rotation without WAS update = classic outage**
+- **Resync success ≠ connection success**
+- **Restart loads new credentials into the pool**
+- **Test Connection = your health check tool**
+
+---

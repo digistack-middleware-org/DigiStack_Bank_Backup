@@ -1,38 +1,92 @@
-## 6. The Fix (One Command!)
 
-On node02:
+## 🛠️ Remediation
 
-```bash
-cd /apps/IBM/WebSphere/AppServer/profiles/<node02-profile>/bin
-./startNode.sh
+> The fix is updating **one field** in the JAAS Auth Alias.
+
+### Method A — Admin Console
+
+1. **Admin Console → Security → Global security**
+2. **Java Authentication and Authorization Service → J2C authentication data**
+3. Click **BankDS_Alias**
+4. Change the Password field back to:
+
+   ```
+   Wasadmin@951951
+   ```
+
+5. Click **OK → Save** (Master Configuration)
+
+### Method B — wsadmin (Jython)
+
+```python
+AdminTask.modifyAuthDataEntry(
+    '[-alias BankDS_Alias '
+    '-user digistack_app '
+    '-password Wasadmin@951951]')
+AdminConfig.save()
 ```
 
-Success message:
-```text
-ADMU3000I: Server nodeagent open for e-business
+---
+
+## ✅ Post-Fix Verification — Run in Order
+
+### Check 1 — Full Resync both nodes
+
 ```
+Admin Console → System administration → Nodes
+Select all nodes → Full Resynchronize
+```
+
+✅ **Expected result:** `Synchronization completed successfully.`
+
+> The corrected alias is now pushed to both node-local repositories.
+
+### Check 2 — Restart both application servers
+
+> The corrected credentials are read from the alias at application
+> server startup — they are **not hot-reloaded**.
+
+```
+Admin Console → Servers → WebSphere application servers
+Select both → Stop → wait → Start
+```
+
+✅ **Expected result:** Both servers show green started status.
+
+### Check 3 — Test Connection
+
+```
+Resources → JDBC → Data sources
+Select DigiStack Bank DataSource → Test connection
+```
+
+✅ **Expected result:**
+
+```
+The test connection operation for data source DigiStack Bank DataSource
+on server server1 at node devdsbinnode01 was successful.
+The test connection operation for data source DigiStack Bank DataSource
+on server server1 at node devdsbinnode02 was successful.
+```
+
+### Check 4 — Application End-to-End
+
+| Action | Expected Result |
+|---|---|
+| Navigate to `http://192.168.10.20/digistack-bank/Home` | ✅ DB Connected shows **"Connected."** |
+| Login as `customer1 / Customer@123` | ✅ Dashboard loads. Session created. |
+| Deposit ₹100 | ✅ Success banner. Balance updated. |
+
 ---
 
-## 7. Verify the Fix (4 Checks)
+## 💡 Key Lessons
 
-1. **Process check:** `ps -ef | grep nodeagent` — PID visible. ✅
-2. **Console check:** Node icon grey → **green**. ✅
-3. **Sync check:** Click Synchronize → "completed successfully."
-   The stuck JVM argument finally reaches node02. ✅
-4. **Cleanup:** Remove the test flag `-Dv6.fault.drill=true`
-   from JVM arguments → Save → Sync → Restart the app server. ✅
-
----
-
-## 8. Key Takeaways (Memory Hooks)
-
-- **One stopped process = six symptoms.** Find the root cause, not the symptoms.
-- **Node Agent = the bridge.** DMgr needs it for sync, commands, and status.
-- **App server ≠ Node Agent.** App can run fine while admin is broken.
-- **"Working app" ≠ "healthy node."** Always check node status too.
-- **Fix:** `./startNode.sh`. Verify with process, console, and sync.
+- **One alias feeds all DB connections** — one wrong password = app-wide DB failure
+- **Green app ≠ working app** — the green icon reflects JVM health, not DataSource health
+- **SQLSTATE 28000 = authentication failure** — go straight to the alias
+- **Credentials are not hot-reloaded** — always restart app servers after alias changes
+- **Synchronized ≠ correct** — bad config syncs to all nodes just as fast as good config
 
 ---
 
-> **One-line summary:** *The phone line was dead; the shop was fine.
-> Fix the line, and everything works again.*
+✅ **Incident INC-v7-001 — Root Cause Confirmed, Remediation Complete.**
