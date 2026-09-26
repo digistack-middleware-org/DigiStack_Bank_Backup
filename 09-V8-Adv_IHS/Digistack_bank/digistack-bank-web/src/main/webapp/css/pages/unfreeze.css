@@ -1,0 +1,173 @@
+/*
+ * unfreeze.css — DigiStack Bank P01 v8 (updated)
+ *
+ * v8 update: all inline style="" attributes extracted to classes.
+ *
+ * Mirror of freeze.css — same structure, different accent colour.
+ * Freeze uses pink (#e91e63). Unfreeze uses green (#28a745).
+ * This visual difference signals the opposite nature of the action.
+ *
+ * Classes shared with other pages come from common.css:
+ *   .navbar-user-label, .alert-icon, .icon-gold, .icon-navy,
+ *   .alert-success-custom, .alert-error-custom, .alert-info-custom,
+ *   .alert-warning-custom, .back-link, .page-header,
+ *   .breadcrumb-nav, .dsb-footer, .btn-logout,
+ *   .navbar-brand-text, .dsb-navbar
+ *
+ * Classes shared with freeze.css (same definition, different file
+ * so each page is independently styleable in the future):
+ *   .status-card, .status-card-title, .status-table,
+ *   .status-label, .status-value, .status-cell,
+ *   .badge-frozen, .badge-active,
+ *   .confirm-card, .confirm-card-title,
+ *   .confirm-description, .confirm-page-link,
+ *   .alert-action-link, .btn-cancel
+ *
+ * New classes unique to this page:
+ *   .confirm-card-unfreeze  — green top border variant
+ *   .icon-unfreeze-confirm  — green colour on unlock icon
+ *   .btn-unfreeze           — green gradient action button
+ */
+
+/* ── Main content wrapper ── */
+.main-content { flex: 1; padding: 32px 0 48px; }
+
+/* ── Alert action link (inside info/warning banners) ── */
+.alert-action-link {
+    font-weight: 700;
+    text-decoration: underline;
+    color: inherit;
+}
+
+/* ── Status Card ── */
+.status-card {
+    background: white;
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    animation: fadeInUp 0.5s ease-out both;
+    margin-bottom: 20px;
+}
+.status-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--db-navy);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ── Status Table ── */
+.status-table {
+    width: 100%;
+    font-size: 0.88rem;
+}
+.status-label {
+    color: #888;
+    padding: 6px 0;
+}
+.status-value {
+    font-weight: 600;
+    color: var(--db-navy);
+    text-align: right;
+}
+.status-cell { text-align: right; }
+
+/* ── Status Badges ── */
+.badge-frozen {
+    color: #e91e63;
+    font-weight: 700;
+}
+.badge-active {
+    color: #28a745;
+    font-weight: 700;
+}
+
+/* ── Confirm Card — base ── */
+.confirm-card {
+    background: white;
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    animation: fadeInUp 0.5s ease-out 0.1s both;
+}
+
+/* ── Confirm Card — unfreeze variant (green top border) ── */
+/* replaces style="border-top:4px solid #28a745;" */
+/* This green border signals a restorative (safe) action,
+   contrasting with freeze.css's pink border (destructive action) */
+.confirm-card-unfreeze {
+    border-top: 4px solid #28a745;
+}
+
+/* ── Confirm Card Title ── */
+.confirm-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--db-navy);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ── Unfreeze confirm icon colour ── */
+/* replaces style="color:#28a745;" on the unlock icon */
+.icon-unfreeze-confirm { color: #28a745; }
+
+/* ── Confirm description paragraph ── */
+/* replaces style="font-size:0.9rem;color:#555;margin-bottom:20px;" */
+.confirm-description {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+/* ── Link inside description ── */
+.confirm-page-link {
+    color: var(--db-navy);
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+/* ── Unfreeze Action Button — green gradient ── */
+/* replaces style="background:linear-gradient(135deg,#1a6b3a,#28a745);
+   color:white;font-weight:700;padding:12px 32px;border:none;
+   border-radius:10px;font-size:0.95rem;transition:..."           */
+.btn-unfreeze {
+    background: linear-gradient(135deg, #1a6b3a, #28a745);
+    color: white;
+    font-weight: 700;
+    padding: 12px 32px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    transition: opacity 0.2s, transform 0.15s;
+}
+.btn-unfreeze:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    color: white;
+}
+
+/* ── Cancel Button ── */
+/* replaces style="background:var(--db-light-bg);color:var(--db-navy);
+   font-weight:600;padding:12px 28px;border:1.5px solid #dde3ed;
+   border-radius:10px;font-size:0.95rem;text-decoration:none;..." */
+.btn-cancel {
+    background: var(--db-light-bg);
+    color: var(--db-navy);
+    font-weight: 600;
+    padding: 12px 28px;
+    border: 1.5px solid #dde3ed;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: background-color 0.2s;
+    display: inline-block;
+}
+.btn-cancel:hover {
+    background: #e2e8f4;
+    color: var(--db-navy);
+}
