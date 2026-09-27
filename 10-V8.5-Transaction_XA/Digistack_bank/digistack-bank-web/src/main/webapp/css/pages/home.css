@@ -1,0 +1,253 @@
+/*
+ * home.css — DigiStack Bank P01 v8 (updated)
+ *
+ * All styles specific to Home.jsp.
+ * v8 update: all inline style="" attributes extracted to classes.
+ *
+ * New classes added in this update:
+ *   .icon-gold            — replaces style="color:var(--db-gold);"
+ *   .icon-brand           — replaces style="font-size:1.6rem;"
+ *   .nav-link-disabled    — replaces style="opacity:0.5;cursor:not-allowed;"
+ *   .btn-coming-soon      — replaces disabled button inline styles
+ *   .icon-hero-graphic    — replaces hero illustration inline styles
+ *   .feature-card-delay-1 through -4 — replaces animation-delay styles
+ *   .feature-link-active  — replaces inline style on the active feature link
+ *   .footer-sub           — replaces footer small text inline style
+ *   .ihs-banner-logo      — replaces img inline style in IHS banner
+ */
+
+/* ── Utility: gold icon colour ── */
+.icon-gold { color: var(--db-gold); }
+
+/* ── Brand icon in navbar ── */
+.icon-brand { font-size: 1.6rem; }
+
+/* ── Override brand text size on Home (larger than other pages) ── */
+.navbar-brand-text { font-size: 1.5rem; }
+
+/* ── IHS banner logo sizing ── */
+.ihs-banner-logo {
+    height: 22px;
+    vertical-align: middle;
+    margin-right: 10px;
+}
+
+/* ── Navbar nav link disabled state ── */
+.nav-link-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+.dsb-navbar .nav-link {
+    color: rgba(255,255,255,0.85) !important;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+.dsb-navbar .nav-link:hover { color: var(--db-gold) !important; }
+
+/* ── Coming soon button (navbar) ── */
+.btn-coming-soon {
+    opacity: 0.5;
+    cursor: not-allowed;
+    color: rgba(255,255,255,0.6);
+    border-color: rgba(255,255,255,0.2);
+}
+
+/* ── Navbar login button ── */
+.btn-login-nav {
+    background-color: var(--db-gold);
+    color: var(--db-navy);
+    font-weight: 700;
+    border: none;
+    padding: 6px 20px;
+    border-radius: 6px;
+    transition: background-color 0.2s, transform 0.1s;
+}
+.btn-login-nav:hover {
+    background-color: var(--db-gold-light);
+    transform: translateY(-1px);
+}
+
+/* ── Hero section ── */
+.hero-section {
+    background: linear-gradient(135deg, var(--db-navy) 0%, #1a3a6b 100%);
+    color: white;
+    padding: 100px 0 80px;
+    position: relative;
+    overflow: hidden;
+}
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: -50%; right: -10%;
+    width: 500px; height: 500px;
+    background: rgba(201,162,39,0.08);
+    border-radius: 50%;
+}
+.hero-title {
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 1.2;
+    animation: fadeInDown 0.8s ease-out both;
+}
+.hero-title span { color: var(--db-gold); }
+.hero-subtitle {
+    font-size: 1.2rem;
+    color: rgba(255,255,255,0.8);
+    margin-top: 1rem;
+    animation: fadeInDown 0.8s ease-out 0.2s both;
+}
+.hero-buttons {
+    margin-top: 2rem;
+    animation: fadeInUp 0.8s ease-out 0.4s both;
+}
+.btn-hero-primary {
+    background-color: var(--db-gold);
+    color: var(--db-navy);
+    font-weight: 700;
+    padding: 14px 36px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: background-color 0.2s, transform 0.15s;
+    text-decoration: none;
+}
+.btn-hero-primary:hover {
+    background-color: var(--db-gold-light);
+    transform: translateY(-2px);
+    color: var(--db-navy);
+}
+.btn-hero-outline {
+    background-color: transparent;
+    color: white;
+    font-weight: 600;
+    padding: 13px 36px;
+    border: 2px solid rgba(255,255,255,0.5);
+    border-radius: 8px;
+    font-size: 1rem;
+    text-decoration: none;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+.hero-badge {
+    display: inline-block;
+    background-color: rgba(201,162,39,0.15);
+    border: 1px solid var(--db-gold);
+    color: var(--db-gold);
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    animation: fadeInDown 0.8s ease-out both;
+}
+
+/* ── Hero graphic icon ── */
+.icon-hero-graphic {
+    font-size: 10rem;
+    color: rgba(201,162,39,0.25);
+}
+
+/* ── DB Status Bar ── */
+.db-status-bar {
+    background-color: rgba(255,255,255,0.07);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding: 10px 0;
+    animation: fadeIn 1s ease-out 0.8s both;
+}
+.db-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 5px 16px;
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.85);
+}
+.status-dot {
+    width: 8px; height: 8px;
+    background-color: #28a745;
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+}
+
+/* ── Stats section ── */
+.stats-section {
+    background-color: var(--db-navy);
+    padding: 50px 0;
+    color: white;
+}
+.stat-item    { text-align: center; }
+.stat-number  { font-size: 2.5rem; font-weight: 800; color: var(--db-gold); line-height: 1; }
+.stat-label   { font-size: 0.9rem; color: rgba(255,255,255,0.7); margin-top: 6px; }
+
+/* ── Features section ── */
+.features-section {
+    padding: 80px 0;
+    background-color: var(--db-light-bg);
+}
+.section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--db-navy);
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+.section-subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 3rem;
+}
+.feature-card {
+    background: white;
+    border-radius: 16px;
+    padding: 36px 28px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    transition: transform 0.25s, box-shadow 0.25s;
+    height: 100%;
+    animation: fadeInUp 0.7s ease-out both;
+}
+.feature-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 32px rgba(11,37,69,0.12);
+}
+
+/* ── Feature card animation delays ── */
+.feature-card-delay-1 { animation-delay: 0.1s; }
+.feature-card-delay-2 { animation-delay: 0.2s; }
+.feature-card-delay-3 { animation-delay: 0.3s; }
+.feature-card-delay-4 { animation-delay: 0.4s; }
+
+.feature-icon {
+    width: 70px; height: 70px;
+    background: linear-gradient(135deg, var(--db-navy), #1a3a6b);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.2rem;
+}
+.feature-icon i { font-size: 1.8rem; color: var(--db-gold); }
+.feature-card h5 { font-weight: 700; color: var(--db-navy); margin-bottom: 0.6rem; }
+.feature-card p  { color: #666; font-size: 0.92rem; line-height: 1.6; }
+
+/* ── Feature link states ── */
+.feature-link {
+    color: var(--db-navy);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+/* Active feature link — replaces inline style="opacity:1;cursor:pointer;..." */
+.feature-link-active {
+    opacity: 1;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+/* ── Footer override (Home uses more padding) ── */
+.dsb-footer { padding: 30px 0; font-size: 0.85rem; color: rgba(255,255,255,0.6); }
+.footer-sub { font-size: 0.78rem; }
