@@ -4,18 +4,18 @@
 A baseline is a "before" photo. Before touching anything, record current balances:
 
 ```sql
-SELECT id, account_number, balance
-FROM   accounts
-WHERE  id IN (1001, 1002);
+sudo -u postgres psql -d digistack_bank -c \
+"SELECT id, account_number, balance FROM accounts WHERE id IN (1,2);"
 ```
 
 Example output:
 
 ```text
- id  | account_number | balance
------+----------------+---------
-1001 | ACC001         | 5000.00
-1002 | ACC002         | 3000.00
+ id | account_number | balance
+----+----------------+----------
+  1 | DSB0000000001  | 93100.00
+  2 | DSB0000000002  | 10900.00
+(2 rows)
 ```
 
 > [!NOTE]
@@ -26,14 +26,14 @@ Example output:
 ### Procedure
 
 1. Browser: `http://192.168.10.20/digistack-bank/XATransfer`
-2. Fill: From `1001` → To `1002`, Amount `500.00`
+2. Fill: From `1` → To `2`, Amount `500.00`
 3. ✅ Tick **"Simulate credit failure"** — deliberately makes the credit step fail.
 4. Click **Execute XA Transfer**.
 
 ### What Happens Under the Hood
 
-1. Debit Rs.500 from `1001` → SQL runs ✅
-2. Credit Rs.500 to `1002` → forced failure ❌
+1. Debit Rs.500 from `1` → SQL runs ✅
+2. Credit Rs.500 to `2` → forced failure ❌
 3. WAS (the transaction manager) sees the failure → tells the debit DB: "Undo that debit!"
 4. **Rollback** → both balances untouched.
 
@@ -42,11 +42,14 @@ Example output:
 Run the psql query again:
 
 ```text
-1001 | ACC001 | 5000.00   ← unchanged ✅
-1002 | ACC002 | 3000.00   ← unchanged ✅
+ id | account_number | balance
+----+----------------+----------
+  1 | DSB0000000001  | 93100.00  ← unchanged ✅
+  2 | DSB0000000002  | 10900.00  ← unchanged ✅
+(2 rows)
 ```
 
-If `1001` is lower → rollback failed. Check the log:
+If `1` is lower → rollback failed. Check the log:
 
 ```text
 /apps/IBM/WebSphere/AppServer/profiles/devdsbindmgr01/logs/devdsbinappcluster01/SystemOut.log
@@ -70,15 +73,18 @@ Same form (scroll down), but:
 
 ### What Happens
 
-1. Debit 100 from `1001` → runs and commits immediately (no coordinator watching).
-2. Credit to `1002` → fails.
+1. Debit 100 from `1` → runs and commits immediately (no coordinator watching).
+2. Credit to `2` → fails.
 3. Nobody rolls anything back.
 
 ### Result
 
 ```text
-1001 | ACC001 | 4900.00   ← Rs.100 gone! ❌
-1002 | ACC002 | 3000.00   ← never received it
+ id | account_number | balance
+----+----------------+----------
+  1 | DSB0000000001  | 93100.00
+  2 | DSB0000000002  | 10900.00
+(2 rows)
 ```
 
 Rs.100 vanished into thin air. This is called an **orphaned debit** — the debit exists, but its partner credit never did.
@@ -96,12 +102,12 @@ Test B caused real damage. Fix it:
 
 ```sql
 BEGIN;
-UPDATE accounts SET balance = balance + 100.00 WHERE id = 1001;
+UPDATE accounts SET balance = balance + 100.00 WHERE id = 1;
 COMMIT;
 
 SELECT id, account_number, balance
 FROM   accounts
-WHERE  id IN (1001, 1002);
+WHERE  id IN (1, 2);
 -- Verify back to 5000.00
 ```
 
