@@ -242,4 +242,40 @@ Full Resync  → pushed to node01 + node02
 - [ ] All three custom properties added to both DataSources, with correct types
 - [ ] Connection tested green on both
 - [ ] Full Resync done on both nodes
-  
+
+---
+# Changes in DB server
+
+Check the Transaction allowed
+```
+sudo -u postgres psql -d digistack_bank -c \
+"SHOW max_prepared_transactions;"
+```
+output
+```
+ max_prepared_transactions
+---------------------------
+ 0
+```
+Means 0 Transactions Allow, we need to change these Number to 10
+
+```
+sudo -u postgres psql -d digistack_bank -c \
+"ALTER SYSTEM SET max_prepared_transactions = 10;"
+```
+Check the Transaction allowed
+```
+sudo -u postgres psql -d digistack_bank -c \
+"SHOW max_prepared_transactions;"
+```
+output
+```
+ max_prepared_transactions
+---------------------------
+ 10
+```
+
+## Restart the Postgresql Server
+```
+systemctl restart postgresql-16.service
+```
