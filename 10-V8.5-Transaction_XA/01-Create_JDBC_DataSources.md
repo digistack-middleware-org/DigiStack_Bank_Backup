@@ -26,7 +26,7 @@ Run on `dsb-dmgr`:
 ls /apps/IBM/SharedLibs/postgresql/postgresql-42.7.3.jar
 ```
 
-- `lib/ext` is a directory WAS automatically adds to the classpath at startup.
+- `SharedLibs` is a directory WAS automatically adds to the classpath at startup.
 - Copy the exact full path — you will paste it into the Provider config.
 
 > [!IMPORTANT]
@@ -42,12 +42,12 @@ ls /apps/IBM/SharedLibs/postgresql/postgresql-42.7.3.jar
 |---|---|---|
 | Database type | `User-defined` | WAS has no built-in PostgreSQL template |
 | Implementation class name | `org.postgresql.xa.PGXADataSource` | XA-capable class from the PostgreSQL driver |
-| Name | `PostgreSQL XA JDBC Provider` | Human-friendly label |
+| Name | `XA LAB JDBC` | Human-friendly label |
 
 On the next page, set the class path:
 
 ```text
-/apps/IBM/WebSphere/AppServer/lib/ext/postgresql-42.7.3.jar
+/apps/IBM/SharedLibs/postgresql/postgresql-42.7.3.jar
 ```
 
 (Use your actual filename from Step 1.)
@@ -78,7 +78,7 @@ Then: **Next → Finish → Save**.
 ### Select JDBC provider page
 
 - Choose **"Select an existing JDBC provider"**
-- Pick `PostgreSQL XA JDBC Provider`
+- Pick `XA LAB JDBC`
 
 ### Database specific properties page
 
