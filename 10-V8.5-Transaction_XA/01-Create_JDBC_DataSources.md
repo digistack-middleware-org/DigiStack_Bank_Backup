@@ -23,10 +23,10 @@ This document describes how to configure two XA-capable PostgreSQL DataSources (
 Run on `dsb-dmgr`:
 
 ```bash
-ls /apps/IBM/WebSphere/AppServer/lib/ext/postgresql*.jar
+ls /apps/IBM/SharedLibs/postgresql/postgresql-42.7.3.jar
 ```
 
-- `lib/ext` is a directory WAS automatically adds to the classpath at startup.
+- `SharedLibs` is a directory WAS automatically adds to the classpath at startup.
 - Copy the exact full path — you will paste it into the Provider config.
 
 > [!IMPORTANT]
@@ -42,12 +42,12 @@ ls /apps/IBM/WebSphere/AppServer/lib/ext/postgresql*.jar
 |---|---|---|
 | Database type | `User-defined` | WAS has no built-in PostgreSQL template |
 | Implementation class name | `org.postgresql.xa.PGXADataSource` | XA-capable class from the PostgreSQL driver |
-| Name | `PostgreSQL XA JDBC Provider` | Human-friendly label |
+| Name | `XA LAB JDBC` | Human-friendly label |
 
 On the next page, set the class path:
 
 ```text
-/apps/IBM/WebSphere/AppServer/lib/ext/postgresql-42.7.3.jar
+/apps/IBM/SharedLibs/postgresql/postgresql-42.7.3.jar
 ```
 
 (Use your actual filename from Step 1.)
@@ -78,7 +78,7 @@ Then: **Next → Finish → Save**.
 ### Select JDBC provider page
 
 - Choose **"Select an existing JDBC provider"**
-- Pick `PostgreSQL XA JDBC Provider`
+- Pick `XA LAB JDBC`
 
 ### Database specific properties page
 
@@ -242,4 +242,40 @@ Full Resync  → pushed to node01 + node02
 - [ ] All three custom properties added to both DataSources, with correct types
 - [ ] Connection tested green on both
 - [ ] Full Resync done on both nodes
-  
+
+---
+# Changes in DB server
+
+Check the Transaction allowed
+```
+sudo -u postgres psql -d digistack_bank -c \
+"SHOW max_prepared_transactions;"
+```
+output
+```
+ max_prepared_transactions
+---------------------------
+ 0
+```
+Means 0 Transactions Allow, we need to change these Number to 10
+
+```
+sudo -u postgres psql -d digistack_bank -c \
+"ALTER SYSTEM SET max_prepared_transactions = 10;"
+```
+Check the Transaction allowed
+```
+sudo -u postgres psql -d digistack_bank -c \
+"SHOW max_prepared_transactions;"
+```
+output
+```
+ max_prepared_transactions
+---------------------------
+ 10
+```
+
+## Restart the Postgresql Server
+```
+systemctl restart postgresql-16.service
+```
