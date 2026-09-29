@@ -215,12 +215,4 @@
     <!-- ═══════════════════════════════════════════════════════════════════════════
      v8.5 Sprint 2 — NonXaControlServlet
      ═══════════════════════════════════════════════════════════════════════════ -->
-    <servlet>
-        <servlet-name>NonXaControlServlet</servlet-name>
-        <servlet-class>com.digistack.bank.servlet.NonXaControlServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>NonXaControlServlet</servlet-name>
-        <url-pattern>/XAControl</url-pattern>
-    </servlet-mapping>
 </web-app>
