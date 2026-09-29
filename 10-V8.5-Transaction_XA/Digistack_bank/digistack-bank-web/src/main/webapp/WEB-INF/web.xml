@@ -192,14 +192,6 @@
         but explicit declaration here keeps all servlets visible in one place.
         If WAS picks up @WebServlet automatically (metadata-complete=false),
         this declaration is harmless — it does not create a duplicate. -->
-    <servlet>
-        <servlet-name>FundsTransferServlet</servlet-name>
-        <servlet-class>com.digistack.bank.servlet.FundsTransferServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>FundsTransferServlet</servlet-name>
-        <url-pattern>/XATransfer</url-pattern>
-    </servlet-mapping>
 
     <!-- Resource reference for jdbc/DebitDS.
         Maps java:comp/env/jdbc/DebitDS (used in FundsTransferBean)
