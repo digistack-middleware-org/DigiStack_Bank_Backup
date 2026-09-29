@@ -1,0 +1,195 @@
+/*
+ * freeze.css — DigiStack Bank P01 v8 (updated)
+ *
+ * v8 update: all inline style="" attributes extracted to classes.
+ *
+ * Classes shared with other pages come from common.css:
+ *   .navbar-user-label, .alert-icon, .icon-gold, .icon-navy,
+ *   .alert-success-custom, .alert-error-custom,
+ *   .alert-warning-custom, .back-link, .page-header,
+ *   .breadcrumb-nav, .dsb-footer, .btn-logout,
+ *   .navbar-brand-text, .dsb-navbar
+ *
+ * New classes specific to this page:
+ *   .status-card            — white card showing current account status
+ *   .status-card-title      — title row inside status card
+ *   .status-table           — table inside status card
+ *   .status-label           — left column td (grey label)
+ *   .status-value           — right column td (bold value)
+ *   .status-cell            — right column td for status badge row
+ *   .badge-frozen           — pink "Frozen" status badge
+ *   .badge-active           — green "Active" status badge
+ *   .confirm-card           — base white card for confirmation form
+ *   .confirm-card-freeze    — pink top border variant for Freeze page
+ *   .confirm-card-title     — title row inside confirm card
+ *   .icon-freeze-warn       — pink warning icon colour
+ *   .confirm-description    — body text paragraph inside confirm card
+ *   .confirm-page-link      — Unfreeze page link inside description
+ *   .btn-freeze             — pink/red gradient freeze action button
+ *   .btn-cancel             — light grey cancel button
+ *   .alert-action-link      — link inside success/warning banners
+ */
+
+/* ── Main content wrapper ── */
+.main-content { flex: 1; padding: 32px 0 48px; }
+
+/* ── Alert action link (inside success/warning banners) ── */
+/* replaces style="color:#166534;font-weight:700;" on Unfreeze link
+   in the success banner, and similar in warning banner             */
+.alert-action-link {
+    font-weight: 700;
+    text-decoration: underline;
+    color: inherit;
+}
+
+/* ── Status Card ── */
+/* replaces style="background:white;border-radius:16px;padding:28px;
+   box-shadow:...;animation:...;margin-bottom:20px;" */
+.status-card {
+    background: white;
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    animation: fadeInUp 0.5s ease-out both;
+    margin-bottom: 20px;
+}
+
+/* replaces style="font-size:1rem;font-weight:700;color:var(--db-navy);
+   margin-bottom:16px;display:flex;align-items:center;gap:8px;" */
+.status-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--db-navy);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ── Status Table ── */
+/* replaces style="width:100%;font-size:0.88rem;" */
+.status-table {
+    width: 100%;
+    font-size: 0.88rem;
+}
+
+/* replaces style="color:#888;padding:6px 0;" */
+.status-label {
+    color: #888;
+    padding: 6px 0;
+}
+
+/* replaces style="font-weight:600;color:var(--db-navy);text-align:right;" */
+.status-value {
+    font-weight: 600;
+    color: var(--db-navy);
+    text-align: right;
+}
+
+/* replaces style="text-align:right;" on status row td */
+.status-cell { text-align: right; }
+
+/* ── Status Badges ── */
+/* replaces style="color:#e91e63;font-weight:700;" on frozen span
+   plus the lock icon inline styles                                 */
+.badge-frozen {
+    color: #e91e63;
+    font-weight: 700;
+}
+
+/* replaces style="color:#28a745;font-weight:700;" on active span
+   plus the unlock icon inline styles                              */
+.badge-active {
+    color: #28a745;
+    font-weight: 700;
+}
+
+/* ── Confirm Card — base ── */
+/* replaces style="background:white;border-radius:16px;padding:28px;
+   box-shadow:...;animation:...;" on the confirmation form card     */
+.confirm-card {
+    background: white;
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    animation: fadeInUp 0.5s ease-out 0.1s both;
+}
+
+/* ── Confirm Card — freeze variant (pink top border) ── */
+/* replaces style="border-top:4px solid #e91e63;" */
+.confirm-card-freeze {
+    border-top: 4px solid #e91e63;
+}
+
+/* replaces style="font-size:1rem;font-weight:700;color:var(--db-navy);
+   margin-bottom:20px;display:flex;align-items:center;gap:8px;"         */
+.confirm-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--db-navy);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ── Freeze warning icon colour ── */
+/* replaces style="color:#e91e63;" on exclamation-triangle icon */
+.icon-freeze-warn { color: #e91e63; }
+
+/* ── Confirm description paragraph ── */
+/* replaces style="font-size:0.9rem;color:#555;margin-bottom:20px;" */
+.confirm-description {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+/* ── Link inside description (Unfreeze page reference) ── */
+/* replaces style="color:var(--db-navy);font-weight:600;" */
+.confirm-page-link {
+    color: var(--db-navy);
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+/* ── Freeze Action Button ── */
+/* replaces style="background:linear-gradient(135deg,#880e4f,#e91e63);
+   color:white;font-weight:700;padding:12px 32px;border:none;
+   border-radius:10px;font-size:0.95rem;transition:..." */
+.btn-freeze {
+    background: linear-gradient(135deg, #880e4f, #e91e63);
+    color: white;
+    font-weight: 700;
+    padding: 12px 32px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    transition: opacity 0.2s, transform 0.15s;
+}
+.btn-freeze:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    color: white;
+}
+
+/* ── Cancel Button ── */
+/* replaces style="background:var(--db-light-bg);color:var(--db-navy);
+   font-weight:600;padding:12px 28px;border:1.5px solid #dde3ed;
+   border-radius:10px;font-size:0.95rem;text-decoration:none;..." */
+.btn-cancel {
+    background: var(--db-light-bg);
+    color: var(--db-navy);
+    font-weight: 600;
+    padding: 12px 28px;
+    border: 1.5px solid #dde3ed;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: background-color 0.2s;
+    display: inline-block;
+}
+.btn-cancel:hover {
+    background: #e2e8f4;
+    color: var(--db-navy);
+}

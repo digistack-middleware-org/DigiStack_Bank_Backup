@@ -1,0 +1,181 @@
+/*
+ * account-details.css — DigiStack Bank P01 v8 (updated)
+ *
+ * v8 update: all inline style="" attributes extracted to classes.
+ *
+ * New classes added:
+ *   .navbar-user-label      — replaces inline styled username span
+ *   .acct-holder-name       — account holder name inside summary card
+ *   .details-table          — wraps the account details table
+ *   .details-label          — left column td (label)
+ *   .details-value          — right column td (value)
+ *   .details-status-cell    — status td (right-aligned)
+ *   .status-frozen          — red Frozen status text
+ *   .status-active          — green Active status text
+ *   .alert-icon             — icon inside alert banner
+ *   .tile-bg-deposit/withdraw/freeze/unfreeze — tile backgrounds
+ *   .icon-deposit/withdraw/freeze/unfreeze    — tile icon colours
+ *   .frozen-actions-notice  — info box shown at bottom when frozen
+ *   .frozen-actions-link    — Unfreeze link inside frozen notice
+ */
+
+/* ── Navbar username label ── */
+/* replaces style="color:rgba(255,255,255,0.75);font-size:0.88rem;" */
+.navbar-user-label {
+    color: rgba(255,255,255,0.75);
+    font-size: 0.88rem;
+}
+
+/* ── Main content ── */
+.main-content { flex: 1; padding: 32px 0 48px; }
+
+/* ── Alert icon sizing ── */
+/* replaces style="font-size:1.2rem;flex-shrink:0;" */
+.alert-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+/* ── Account holder name in summary card ── */
+/* replaces style="font-size:1.05rem;font-weight:600;margin-bottom:6px;" */
+.acct-holder-name {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+/* ── Info Card ── */
+.info-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px 26px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    animation: fadeInUp 0.5s ease-out 0.1s both;
+    margin-bottom: 20px;
+}
+.info-card-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--db-navy);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ── Account Details Table ── */
+/* replaces style="width:100%;font-size:0.88rem;" */
+.details-table {
+    width: 100%;
+    font-size: 0.88rem;
+}
+
+/* ── Table label column ── */
+/* replaces style="color:#888;padding:6px 0;" */
+.details-label {
+    color: #888;
+    padding: 6px 0;
+}
+
+/* ── Table value column ── */
+/* replaces style="font-weight:600;color:var(--db-navy);text-align:right;" */
+.details-value {
+    font-weight: 600;
+    color: var(--db-navy);
+    text-align: right;
+}
+
+/* ── Status cell (right-aligned) ── */
+/* replaces style="text-align:right;" */
+.details-status-cell { text-align: right; }
+
+/* ── Status text: Frozen ── */
+/* replaces style="color:#dc3545;font-weight:600;" */
+.status-frozen {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+/* ── Status text: Active ── */
+/* replaces style="color:#28a745;font-weight:600;" */
+.status-active {
+    color: #28a745;
+    font-weight: 600;
+}
+
+/* ── Actions Grid ── */
+.actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    animation: fadeInUp 0.5s ease-out 0.15s both;
+}
+.action-tile {
+    background: white;
+    border-radius: 14px;
+    padding: 22px 20px;
+    text-align: center;
+    text-decoration: none;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: block;
+}
+.action-tile:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(11,37,69,0.1);
+}
+.action-tile.tile-disabled {
+    opacity: 0.45;
+    pointer-events: none;
+    cursor: not-allowed;
+}
+.tile-icon-wrap {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+}
+.tile-icon-wrap i { font-size: 1.4rem; }
+.tile-name {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--db-navy);
+    margin-bottom: 2px;
+}
+.tile-desc { font-size: 0.75rem; color: #999; }
+
+/* ── Tile backgrounds ── */
+/* replaces style="background:#e8f4fd;" etc. on each .tile-icon-wrap */
+.tile-bg-deposit  { background: #e8f4fd; }
+.tile-bg-withdraw { background: #fff3e0; }
+.tile-bg-freeze   { background: #fce4ec; }
+.tile-bg-unfreeze { background: #e8f5e9; }
+
+/* ── Tile icon colours ── */
+/* replaces style="color:#2196f3;" etc. on each icon i element */
+.icon-deposit  { color: #2196f3; }
+.icon-withdraw { color: #ff9800; }
+.icon-freeze   { color: #e91e63; }
+.icon-unfreeze { color: #4caf50; }
+
+/* ── Frozen actions notice (bottom of tile grid) ── */
+/* replaces large inline style div when account is frozen */
+.frozen-actions-notice {
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    color: #856404;
+}
+
+/* ── Unfreeze link inside the frozen notice ── */
+/* replaces style="color:#856404;font-weight:700;" */
+.frozen-actions-link {
+    color: #856404;
+    font-weight: 700;
+    text-decoration: underline;
+}

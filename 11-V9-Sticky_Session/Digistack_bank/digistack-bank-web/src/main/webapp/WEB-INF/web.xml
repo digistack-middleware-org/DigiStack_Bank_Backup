@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    web.xml — DigiStack Bank P01 v6
+
+    Deployment descriptor for the digistack-bank-web module.
+
+    Key design decisions:
+    ─────────────────────────────────────────────────────────
+    1. metadata-complete="false"
+       Tells WAS to scan for @WebServlet annotations on every
+       servlet class. This is mandatory — without it WAS only
+       reads this file and ignores all @WebServlet declarations.
+       Every servlet URL mapping lives in the servlet class itself,
+       not repeated here. This is the Servlet 3.0+ standard.
+
+    2. No <servlet> / <servlet-mapping> blocks
+       All URL patterns are declared via @WebServlet annotations
+       in the Java source. Declaring them again here would cause
+       duplicate-mapping conflicts on deployment. Only servlets
+       that need web.xml-specific config (init-params, load-on-startup
+       ordering) ever appear in both places.
+
+    3. Session timeout: 30 minutes
+       Industry standard for banking applications.
+       WAS honours this setting per-session. After 30 minutes of
+       inactivity the session is invalidated server-side and the
+       next request from that browser hits the session guard in
+       each servlet, which redirects to /Login.
+
+    4. Welcome file: index.jsp
+       The root URL (http://host/digistack-bank/) loads index.jsp,
+       which contains a JSP forward to /Home. This avoids a bare
+       directory listing on the root context.
+
+    5. Error pages
+       404 → /Home  (avoids WAS default error page on bad URLs)
+       500 → /Home  (avoids stack-trace exposure on server errors)
+       Both redirect to the public Home page so the user always
+       sees something meaningful rather than a WAS error page.
+
+    URL summary (all mapped via @WebServlet):
+    ─────────────────────────────────────────────────────────
+    /Home           → HomeServlet         (GET)
+    /Login          → LoginServlet        (GET, POST)
+    /Logout         → LogoutServlet       (GET, POST)
+    /Dashboard      → DashboardServlet    (GET)
+    /BalanceJson    → BalanceJsonServlet  (GET — AJAX endpoint)
+    /Account        → AccountServlet      (GET only — view)
+    /Deposit        → DepositServlet      (GET, POST)
+    /Withdraw       → WithdrawServlet     (GET, POST)
+    /Freeze         → FreezeServlet       (GET, POST)
+    /Unfreeze       → UnfreezeServlet     (GET, POST)
+
+    TECHNICAL DEBT (v6): No <security-constraint> blocks.
+    Role-based URL protection (ADMINISTRATOR vs CUSTOMER)
+    deferred to v10 using WAS form-based authentication.
+    ─────────────────────────────────────────────────────────
+-->
+<web-app
+    xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee
+                        http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+    version="3.1"
+    metadata-complete="false">
+
+    <!--
+        Display name — shown in WAS Admin Console under
+        Applications → Application Types → WebSphere enterprise applications.
+        Helps identify this module at a glance during administration.
+    -->
+    <display-name>DigiStack Bank</display-name>
+
+    <description>
+        DigiStack Bank Web Application — P01 v6 Application Administration.
+        Runs on WebSphere ND 9.0.5.28. Servlet 3.1 / Java EE 7.
+    </description>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         SESSION CONFIGURATION
+         ═══════════════════════════════════════════════════════════
+         session-timeout is in minutes.
+         30 minutes = standard banking application idle timeout.
+         After this period of inactivity:
+           - WAS invalidates the HttpSession on the server side.
+           - The session attributes (userId, username, role, etc.)
+             are destroyed.
+           - The next request hits the session guard in each servlet
+             (request.getSession(false) returns null) and the user
+             is redirected to /Login automatically.
+    -->
+    <session-config>
+        <session-timeout>30</session-timeout>
+    </session-config>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         WELCOME FILE
+         ═══════════════════════════════════════════════════════════
+         When a browser requests the root context URL with no path
+         (e.g. http://192.168.10.20/digistack-bank/), WAS serves
+         index.jsp, which forwards to /Home.
+
+         index.jsp must exist at:
+           digistack-bank-web/src/main/webapp/index.jsp
+
+         Contents of index.jsp (one line):
+           <% response.sendRedirect(request.getContextPath() + "/Home"); %>
+    -->
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+    </welcome-file-list>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         ERROR PAGES
+         ═══════════════════════════════════════════════════════════
+         Without these, WAS serves its own default error pages which
+         expose the WAS version, server name, and sometimes stack
+         traces — information that should never be visible to users.
+
+         404 Not Found:
+           Triggered when a user types a bad URL manually, or a link
+           in the application points to a URL that no longer exists.
+           Redirecting to /Home keeps the user in the application.
+
+         500 Internal Server Error:
+           Triggered when a servlet throws an uncaught exception.
+           Redirecting to /Home hides the stack trace from the user.
+           The actual exception is still written to WAS SystemOut.log
+           for the administrator to diagnose.
+    -->
+    <error-page>
+        <error-code>404</error-code>
+        <location>/Home</location>
+    </error-page>
+
+    <error-page>
+        <error-code>500</error-code>
+        <location>/Home</location>
+    </error-page>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         MIME TYPE MAPPINGS
+         ═══════════════════════════════════════════════════════════
+         Explicitly declares the MIME type for CSS files.
+         Some WAS configurations do not serve .css files with the
+         correct Content-Type header by default, which causes
+         browsers to ignore the stylesheet entirely.
+         Declaring it here forces the correct header on every
+         CSS response served from this application.
+    -->
+    <mime-mapping>
+        <extension>css</extension>
+        <mime-type>text/css</mime-type>
+    </mime-mapping>
+
+    <mime-mapping>
+        <extension>js</extension>
+        <mime-type>application/javascript</mime-type>
+    </mime-mapping>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         NO <servlet> / <servlet-mapping> BLOCKS
+         ═══════════════════════════════════════════════════════════
+         All servlets in this application use the @WebServlet
+         annotation to declare their URL patterns. Because
+         metadata-complete="false" is set above, WAS scans all
+         classes in the WAR for these annotations at deployment time.
+
+         The full list of URL-mapped servlets:
+
+         HomeServlet        @WebServlet({"/Home",    "/home"})
+         LoginServlet       @WebServlet({"/Login",   "/login"})
+         LogoutServlet      @WebServlet({"/Logout",  "/logout"})
+         DashboardServlet   @WebServlet({"/Dashboard","/dashboard"})
+         BalanceJsonServlet @WebServlet("/BalanceJson")
+         AccountServlet     @WebServlet({"/Account", "/account"})
+         DepositServlet     @WebServlet({"/Deposit", "/deposit"})
+         WithdrawServlet    @WebServlet({"/Withdraw","/withdraw"})
+         FreezeServlet      @WebServlet({"/Freeze",  "/freeze"})
+         UnfreezeServlet    @WebServlet({"/Unfreeze","/unfreeze"})
+
+         Adding any of these here as <servlet-mapping> entries would
+         cause WAS to throw a deployment error:
+           "Duplicate mapping for URL pattern /Deposit"
+         Do NOT add them.
+    -->
+
+</web-app>

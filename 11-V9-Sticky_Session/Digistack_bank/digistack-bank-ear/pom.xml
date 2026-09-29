@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+        Parent reference — inherits version, groupId, and
+        dependency management from the root pom.xml.
+    -->
+    <parent>
+        <groupId>com.digistack</groupId>
+        <artifactId>digistack-bank-parent</artifactId>
+        <version>1.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <!--
+        This module produces a .ear file, not a .jar or .war.
+        Maven's EAR packaging type handles the assembly automatically
+        via the maven-ear-plugin configured below.
+    -->
+    <artifactId>digistack-bank-ear</artifactId>
+    <packaging>ear</packaging>
+    <name>DigiStack Bank EAR</name>
+    <description>
+        Enterprise Archive for DigiStack Bank — v7.
+        Wraps digistack-bank-web.war with a WAS-standard
+        application.xml descriptor and context root definition.
+        v7: all Services migrated from direct JDBC to jdbc/BankDS
+        JNDI DataSource. Direct-JDBC debt from v1 fully closed.
+    </description>
+
+    <dependencies>
+        <!--
+            Declare the WAR module as a dependency so Maven knows
+            to build it first and include it in the EAR.
+            scope=compile is intentional for EAR assembly.
+            type=war tells the EAR plugin this is a web module.
+        -->
+        <dependency>
+            <groupId>com.digistack</groupId>
+            <artifactId>digistack-bank-web</artifactId>
+            <version>${project.version}</version>
+            <type>war</type>
+        </dependency>
+    </dependencies>
+
+    <build>
+            <finalName>digistack-bank-v7</finalName>
+        <plugins>
+            <plugin>
+                <!--
+                    maven-ear-plugin — assembles the EAR.
+                    Reads the <modules> config below to know
+                    what to include and how to name things.
+                -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-ear-plugin</artifactId>
+                <version>3.3.0</version>
+                <configuration>
+
+                    <!--
+                        Java EE / Jakarta EE version.
+                        version="7" matches WAS ND 9.0.5.x's
+                        Java EE 7 support — do not change this
+                        to a higher version or WAS will reject
+                        the deployment.
+                    -->
+                    <version>7</version>
+
+                    <!--
+                        generateApplicationXml=false means we
+                        supply our own application.xml (in
+                        src/main/application/META-INF/).
+                        This gives us explicit control over the
+                        context root and display-name.
+                    -->
+                    <generateApplicationXml>false</generateApplicationXml>
+
+                    <modules>
+                        <webModule>
+                            <!--
+                                Must match the WAR module's
+                                groupId + artifactId exactly.
+                            -->
+                            <groupId>com.digistack</groupId>
+                            <artifactId>digistack-bank-web</artifactId>
+
+                            <!--
+                                The filename of the WAR inside
+                                the EAR. Must match the
+                                <web-uri> in application.xml.
+                            -->
+                            <bundleFileName>
+                                digistack-bank-web.war
+                            </bundleFileName>
+
+                            <!--
+                                Context root — the URL path under
+                                which the application is served.
+                                With this set, the app is at:
+                                http://<host>/digistack-bank/Home
+                            -->
+                            <contextRoot>/digistack-bank</contextRoot>
+                        </webModule>
+                    </modules>
+
+
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
