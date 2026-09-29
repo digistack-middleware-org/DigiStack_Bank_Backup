@@ -23,7 +23,7 @@ This document describes how to configure two XA-capable PostgreSQL DataSources (
 Run on `dsb-dmgr`:
 
 ```bash
-ls /apps/IBM/WebSphere/AppServer/lib/ext/postgresql*.jar
+ls /apps/IBM/SharedLibs/postgresql/postgresql-42.7.3.jar
 ```
 
 - `lib/ext` is a directory WAS automatically adds to the classpath at startup.
